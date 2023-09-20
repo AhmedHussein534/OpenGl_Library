@@ -3,6 +3,44 @@
 
 #include <memory>
 
+namespace SetUniformDetailed
+{
+template <class ...Types>
+void setUniformValue(int location, Types... values)
+{
+	std::cout << "Unknown function: " << __FUNCTION__ << std::endl;
+}
+
+template<>
+void setUniformValue(int location, float f1)
+{
+	GLCall(glUniform1f(location, f1));
+}
+
+template<>
+void setUniformValue(int location, float f1, float f2)
+{
+	GLCall(glUniform2f(location, f1, f2));
+}
+
+template<>
+void setUniformValue(int location, float f1, float f2, float f3)
+{
+	GLCall(glUniform3f(location, f1, f2, f3));
+}
+
+template<>
+void setUniformValue(int location, float f1, float f2, float f3, float f4)
+{
+	GLCall(glUniform4f(location, f1, f2, f3, f4));
+}
+
+template<>
+void setUniformValue(int location, int32_t f1)
+{
+	GLCall(glUniform1i(location, f1));
+}
+}
 
 Shader::Shader(std::string vertexShader, std::string fragmentShader) : m_vertexShader(vertexShader),
                                                                        m_fragmentShader(fragmentShader),
@@ -57,8 +95,27 @@ unsigned int Shader::compileShader(unsigned int type, const std::string& source)
         std::unique_ptr<char []> message = std::make_unique<char []>(length);
         glGetShaderInfoLog(id, length, &length, message.get());
         std::cout << "Failed to compile shader: ";
-        std::cout << message;
+        std::cout << message.get();
         std::cout << std::endl;
     }
     return id;
+}
+
+int Shader::getUniformLocation(const std::string &uniformName)
+{
+    auto itr = locationCache.find(uniformName);
+    if (itr != locationCache.end())
+    {
+        return itr->second;
+    }
+
+    GLCall(int location = glGetUniformLocation(program, uniformName.c_str()));
+	if (location == -1)
+	{
+		std::cout << "Uniform: " << uniformName << " not found!" << std::endl;
+		ASSERT(0);
+	}
+
+    locationCache[uniformName] = location;
+    return location;
 }

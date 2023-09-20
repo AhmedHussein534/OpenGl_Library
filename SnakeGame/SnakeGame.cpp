@@ -12,6 +12,8 @@
 #include "engine/Elements/Square.hpp"
 #include "StbTexture.hpp"
 
+#define LOG_DEBUG std::cout
+
 #define SWAP_INTERVAL 1
 
 GLFWwindow* createWindow()
@@ -64,10 +66,10 @@ GLFWwindow* init()
         }
 
         ret = window;
-
+        std::cout << glGetString(GL_VERSION) << std::endl;
     } while (0);
-   
-    std::cout << glGetString(GL_VERSION) << std::endl;
+
+
     return ret;
 }
 
@@ -80,41 +82,12 @@ int main(void)
     }
 
     {
-        // Simple Animation
-        std::vector<std::shared_ptr<Layout>> layouts = {};
-        /*
-        float step = 0.1f;
-        for (float start = 1.0f; start >= 0; start -= step)
-        {
-            std::shared_ptr<Layout> layout = std::make_shared<Layout>();
-            layout->addElement(std::make_shared<Square>(-start, start, 2 * start, 0.0f, 0.0f, 1.0f, 1.0f));
-            layouts.push_back(layout);
-        }
-        */
 
-        
-        
-  
+        std::vector<std::shared_ptr<Layout>> layouts = {};
         std::shared_ptr<Layout> layout = std::make_shared<Layout>();
-        auto ptr = std::make_shared<StbTexture>("C:\\Users\\ahmed\\source\\repos\\SnakeGame\\SnakeGame\\res\\grid.png");
+        auto ptr = std::make_shared<StbTexture>("res\\grid.png");
         layout->addElement(ptr->getTex());
         layouts.push_back(layout);
-        /*
-        float step = 0.1f;
-        for (float start = 0.0f; start <= 360.0f; start += step)
-        {
-            std::shared_ptr<Layout> layout = std::make_shared<Layout>();
-            layout->addElement(std::make_shared<Square>(-1.0f, 1.0f, 0.25f, 0.0f, 0.0f, 1.0f, 1.0f, start));
-            layout->addElement(std::make_shared<Square>(-0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, start));
-            layouts.push_back(layout);
-        }
-        */
-
-
-        
-       
-       
-        
         bool shouldBreak = false;
         while (true)
         {
@@ -131,7 +104,7 @@ int main(void)
                 {
                     shouldBreak = true;
                     break;
-                    
+
                 }
             }
 
@@ -141,7 +114,7 @@ int main(void)
             }
         }
     }
-    
+
     glfwTerminate();
     return 0;
 }

@@ -1,0 +1,3 @@
+[submodule "SnakeGame/external/glfw"]
+	path = SnakeGame/external/glfw
+	url = https://github.com/glfw/glfw.git
