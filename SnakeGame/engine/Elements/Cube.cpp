@@ -20,11 +20,29 @@ Cube::Cube(float x, float y, float length,
     m_rotateAxisX(rotateAxisX),
     m_rotateAxisY(rotateAxisY),
     vertexBuffer(std::make_unique<VertexBuffer>()),
-    indexBuffer(nullptr)
+    indexBuffer(std::make_unique<IndexBuffer>())
 {
+    vertexElements.emplace_back(3, ElementDataType::FLOAT, true, 3 * sizeof(float));
 
+    position = std::array<float, CUBE_DATA::positionCount>({
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+    });
 
- 
+    indices = std::array<unsigned int, CUBE_DATA::indexCount>({
+        0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4,
+        7, 3, 0, 0, 4, 7, 6, 2, 1, 1, 5, 6,
+        0, 1, 5, 5, 4, 0, 3, 2, 6, 6, 7, 3
+    });
+
+    shader = std::make_unique<Shader>(vertexShader, fragmentShader);
+
 }
 
 
@@ -33,7 +51,7 @@ Cube::Cube(float x, float y, float length,
     float r, float g, float b, float a,
     float rotate, bool isDataNormalized) : Cube(x, y, length, r, g, b, a, rotate, x + length / 2, y - length / 2, isDataNormalized)
 {
-    vertexElements.emplace_back(3, ElementDataType::FLOAT, true, 3 * sizeof(float));
+
 }
 
 void Cube::bind()
@@ -44,52 +62,9 @@ void Cube::bind()
     model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
     projection = glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
+    vertexBuffer->addVertexData((void*)position.data(), position.size() * sizeof(float));
+    indexBuffer->addIndexData(indices.data(), indices.size() * sizeof(unsigned int));
 
-    std::vector<float> vec = {
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-    };
-    vertexBuffer->addVertexData(vec.data(), vec.size() * sizeof(float));
-    shader = std::make_unique<Shader>(vertexShader, fragmentShader);
     shader->bind();
     shader->setUniformValue("model", 1, false, glm::value_ptr(model));
     shader->setUniformValue("view", 1, false, glm::value_ptr(view));

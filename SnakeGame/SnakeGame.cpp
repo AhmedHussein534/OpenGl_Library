@@ -86,7 +86,7 @@ int main(void)
 
         std::vector<std::shared_ptr<Layout>> layouts = {};
         std::shared_ptr<Layout> layout = std::make_shared<Layout>();
-        layout->addElement(std::make_shared<Cube>(-1.0f, 1.0f, 0.25f, 0.0f, 0.0f, 1.0f, 1.0f));
+        layout->addElement(std::make_shared<Cube>(-0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f));
         layouts.push_back(layout);
         bool shouldBreak = false;
         while (true)

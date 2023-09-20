@@ -31,7 +31,7 @@ void Layout::addElement(std::shared_ptr<IElement> e)
 void Layout::draw()
 {
     glClear(GL_COLOR_BUFFER_BIT);
-    
+
     vArray.bind();
     for (auto& e : elements)
     {
@@ -51,11 +51,12 @@ void Layout::draw()
             offset += element.count * static_cast<int>(element.getDataSize());
             index++;
         }
-      
-        
-       //  glDrawElements(GL_TRIANGLES, e->getIndicesCount(), GL_FLOAT, nullptr);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-       
+
+
+
+       glDrawElements(GL_TRIANGLES, e->getIndicesCount(), GL_UNSIGNED_INT, nullptr);
+
+
     }
 }
 

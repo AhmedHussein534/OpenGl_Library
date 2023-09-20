@@ -20,8 +20,8 @@ Square::Square(float x, float y, float length,
                                                                     vertexBuffer(std::make_unique<VertexBuffer>()),
                                                                     indexBuffer(std::make_unique<IndexBuffer>())
 {
-   
-    
+
+
     if (isDataNormalized)
     {
         if (x > 1.0f || x < -1.0f)
@@ -77,11 +77,11 @@ Square::Square(float x, float y, float length,
                float r, float g, float b, float a,
                float rotate, bool isDataNormalized) : Square(x, y, length, r, g, b, a, rotate, x + length/2, y - length/2, isDataNormalized)
 {
-    
+
 }
 
 void Square::bind()
-{ 
+{
     vertexBuffer->addVertexData(position.data(), sizeof(position));
     indexBuffer->addIndexData(indices.data(), sizeof(indices));
     shader = std::make_unique<Shader>(vertexShader, fragmentShader);

@@ -47,10 +47,10 @@ private:
     float m_rotate;
     float m_rotateAxisX;
     float m_rotateAxisY;
-    
+
     std::unique_ptr<VertexBuffer> vertexBuffer;
     std::unique_ptr<IndexBuffer> indexBuffer;
-    std::vector<float> position;
+    std::array<float, CUBE_DATA::positionCount> position;
     std::array<unsigned int, CUBE_DATA::indexCount> indices;
     std::vector<VertexElement> vertexElements;
     std::unique_ptr<Shader> shader;
