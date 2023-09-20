@@ -10,6 +10,7 @@
 #include "engine/Shader.hpp"
 #include "engine/Layout.hpp"
 #include "engine/Elements/Square.hpp"
+#include "engine/Elements/Cube.hpp"
 #include "StbTexture.hpp"
 
 #define LOG_DEBUG std::cout
@@ -85,8 +86,7 @@ int main(void)
 
         std::vector<std::shared_ptr<Layout>> layouts = {};
         std::shared_ptr<Layout> layout = std::make_shared<Layout>();
-        auto ptr = std::make_shared<StbTexture>("res\\grid.png");
-        layout->addElement(ptr->getTex());
+        layout->addElement(std::make_shared<Cube>(-1.0f, 1.0f, 0.25f, 0.0f, 0.0f, 1.0f, 1.0f));
         layouts.push_back(layout);
         bool shouldBreak = false;
         while (true)

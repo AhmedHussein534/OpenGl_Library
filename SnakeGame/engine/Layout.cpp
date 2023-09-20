@@ -36,7 +36,6 @@ void Layout::draw()
     for (auto& e : elements)
     {
         e->bind();
-
         uint32_t index = 0;
         const auto& vertexElements = e->getVertexElements();
         int offset = 0;
@@ -49,13 +48,13 @@ void Layout::draw()
                 (element.normalized ? GL_FALSE : GL_TRUE)/* data is already normalized so false for normalization */,
                 element.stride /* stride i.e how many bytes to increment to move to next vertex */,
                 (const void*) offset);
-
             offset += element.count * static_cast<int>(element.getDataSize());
             index++;
         }
       
         
-        glDrawElements(GL_TRIANGLES, e->getIndicesCount(), GL_UNSIGNED_INT, nullptr);
+       //  glDrawElements(GL_TRIANGLES, e->getIndicesCount(), GL_FLOAT, nullptr);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
        
     }
 }

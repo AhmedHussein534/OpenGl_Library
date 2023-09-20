@@ -30,6 +30,19 @@ public:
 	int getUniformLocation(const std::string &uniformName);
 
 
+	template<>
+	void setUniformValue(const std::string& name, int count, bool transpose, float *mat)
+	{
+		GLCall(int location = glGetUniformLocation(program, name.c_str()));
+		if (location == -1)
+		{
+			std::cout << "Uniform: " << name << " not found!" << std::endl;
+			ASSERT(0);
+		}
+
+		GLCall(glUniformMatrix4fv(location, count, transpose, mat));
+	}
+
 	~Shader();
 
 private:

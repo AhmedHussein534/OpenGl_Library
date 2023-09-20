@@ -6,7 +6,6 @@ set(BOOST_ROOT "C:\\local\\boost_1_83_0")
 find_package(OpenGL REQUIRED)
 find_package(Boost REQUIRED)
 
-message(${OPENGL_LIBRARY})
 
 add_definitions(-DGLEW_STATIC)
 add_definitions(-DGLFW_BUILD_WIN32)
@@ -16,12 +15,14 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/external/glfw")
 include_directories(
 	"${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include/"
 	"${CMAKE_CURRENT_SOURCE_DIR}/external/glew/include"
+	"${CMAKE_CURRENT_SOURCE_DIR}/external/glm"
 	"${CMAKE_CURRENT_SOURCE_DIR}/engine"
 	"${Boost_INCLUDE_DIRS}"
 	"${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
 link_directories("${CMAKE_BINARY_DIR}/SnakeGame/external/glfw/src/")
+message("${CMAKE_BINARY_DIR}/SnakeGame/external/glfw/src/")
 # Add source to this project's executable.
 add_executable (SnakeGame
                 "SnakeGame.cpp"
@@ -32,14 +33,12 @@ add_executable (SnakeGame
 				"engine/Shader.cpp"
 				"engine/Layout.cpp"
 				"engine/Elements/Square.cpp"
-				"external/stb_image/stb_image.cpp"
-				"engine/Elements/Texture.hpp"
 				"engine/Elements/Texture.cpp"
-				# GLEW FILES
-				"${CMAKE_CURRENT_SOURCE_DIR}/external/glew/src/glew.c"
-				# STB Texture
-				"StbTexture.cpp")
-
+				"engine/Elements/Cube.cpp"
+				"external/stb_image/stb_image.cpp"
+				"external/glew/src/glew.c"
+				"StbTexture.cpp"
+				)
 
 target_link_libraries(SnakeGame
 	"${OPENGL_LIBRARY}"
