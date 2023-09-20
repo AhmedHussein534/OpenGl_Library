@@ -19,7 +19,7 @@ namespace TextureData
 class Texture : public IElement
 {
 public:
-	Texture(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BPP, uint32_t slot, 
+	Texture(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BPP, uint32_t slot,
 		    float x, float y, float length, float rotate, float rotateAxisX, float rotateAxisY);
 
 	void bind() override;
@@ -33,15 +33,13 @@ public:
 	~Texture();
 
 private:
-	
+
 	uint32_t m_rendererId;
 	uint8_t* m_localBuffer;
 	int m_width;
 	int m_height;
 	int m_BPP;
 	uint32_t m_activeSlot;
-	std::array<float, TextureData::positionCount> position;
-	std::array<unsigned int, TextureData::indexCount> indices;
 	float m_x;
 	float m_y;
 	float m_length;
@@ -52,7 +50,7 @@ private:
 	std::unique_ptr<IndexBuffer> indexBuffer;
 	std::unique_ptr<Shader> shader;
 	std::vector<VertexElement> vertexElements;
-	
+
 	std::string vertexShader =
 		"#version 410 core\n"
 		"layout(location = 0) in vec4 position;\n"

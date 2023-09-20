@@ -16,14 +16,14 @@ class Square : public IElement
 {
 public:
 	Square(float x, float y, float length,
-		   float r, float g, float b, float a, 
+		   float r, float g, float b, float a,
            float rotate, float rotateAxisX, float rotateAxisY, bool isDataNormalized = true);
 
     Square(float x, float y, float length,
         float r, float g, float b, float a,
         float rotate = 0.0f, bool isDataNormalized = true);
 
-    
+
 	void bind() override;
 
 	void unbind() override;
@@ -47,8 +47,6 @@ private:
 
 	std::unique_ptr<VertexBuffer> vertexBuffer;
 	std::unique_ptr<IndexBuffer> indexBuffer;
-    std::array<float, positionCount> position;
-    std::array<unsigned int, indexCount> indices;
     std::vector<VertexElement> vertexElements;
     std::unique_ptr<Shader> shader;
     std::string vertexShader =

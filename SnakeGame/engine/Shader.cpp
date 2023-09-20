@@ -46,11 +46,7 @@ Shader::Shader(std::string vertexShader, std::string fragmentShader) : m_vertexS
                                                                        m_fragmentShader(fragmentShader),
                                                                        program(0)
 {
-
-}
-
-void Shader::bind()
-{
+    std::cout << "HERE1" << std::endl;
     GLCall(program = glCreateProgram());
     GLCall(unsigned int vs = compileShader(GL_VERTEX_SHADER, m_vertexShader));
     GLCall(unsigned int fs = compileShader(GL_FRAGMENT_SHADER, m_fragmentShader));
@@ -62,7 +58,10 @@ void Shader::bind()
 
     glDeleteShader(fs);
     glDeleteShader(vs);
+}
 
+void Shader::bind()
+{
     GLCall(glUseProgram(program));
 }
 

@@ -17,8 +17,8 @@ Square::Square(float x, float y, float length,
                                                                     m_rotate(rotate),
                                                                     m_rotateAxisX(rotateAxisX),
                                                                     m_rotateAxisY(rotateAxisY),
-                                                                    vertexBuffer(std::make_unique<VertexBuffer>()),
-                                                                    indexBuffer(std::make_unique<IndexBuffer>())
+                                                                    vertexBuffer(nullptr),
+                                                                    indexBuffer(nullptr)
 {
 
 
@@ -43,6 +43,8 @@ Square::Square(float x, float y, float length,
         }
     }
 
+    std::shared_ptr<std::vector<float>> vertexData = std::make_shared<std::vector<float>>();
+    std::shared_ptr<std::vector<uint32_t>> indexData = std::make_shared<std::vector<uint32_t>>();
     constexpr float pi = 3.14159265359f;
     float angle_rad = m_rotate * pi / 180;
 
@@ -52,23 +54,26 @@ Square::Square(float x, float y, float length,
     float m_x_new = (m_x - m_rotateAxisX) * cos_angle - (m_y - m_rotateAxisY) * sin_angle;
     float m_y_new = (m_y - m_rotateAxisY) * cos_angle + (m_x - m_rotateAxisX) * sin_angle;
 
-    position[0] = (m_x_new)+m_rotateAxisX;
-    position[1] = (m_y_new)+m_rotateAxisY;
-    position[2] = (m_x_new + m_length * cos_angle) + m_rotateAxisX;
-    position[3] = (m_y_new + m_length * sin_angle) + m_rotateAxisY;
-    position[4] = (m_x_new + m_length * (cos_angle + sin_angle)) + m_rotateAxisX;
-    position[5] = (m_y_new + m_length * (sin_angle - cos_angle)) + m_rotateAxisY;
-    position[6] = (m_x_new + m_length * sin_angle) + m_rotateAxisX;
-    position[7] = (m_y_new - m_length * cos_angle) + m_rotateAxisY;
+    vertexData->push_back((m_x_new)+m_rotateAxisX);
+    vertexData->push_back((m_y_new)+m_rotateAxisY);
+    vertexData->push_back((m_x_new + m_length * cos_angle) + m_rotateAxisX);
+    vertexData->push_back((m_y_new + m_length * sin_angle) + m_rotateAxisY);
+    vertexData->push_back((m_x_new + m_length * (cos_angle + sin_angle)) + m_rotateAxisX);
+    vertexData->push_back((m_y_new + m_length * (sin_angle - cos_angle)) + m_rotateAxisY);
+    vertexData->push_back((m_x_new + m_length * sin_angle) + m_rotateAxisX);
+    vertexData->push_back((m_y_new - m_length * cos_angle) + m_rotateAxisY);
 
     vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 2 * sizeof(float));
 
-    indices[0] = 0;
-    indices[1] = 1;
-    indices[2] = 2;
-    indices[3] = 2;
-    indices[4] = 3;
-    indices[5] = 0;
+    indexData->push_back(0);
+    indexData->push_back(1);
+    indexData->push_back(2);
+    indexData->push_back(2);
+    indexData->push_back(3);
+    indexData->push_back(0);
+
+    vertexBuffer = std::make_unique<VertexBuffer>(vertexData),
+    indexBuffer = std::make_unique<IndexBuffer>(indexData);
 }
 
 
@@ -82,8 +87,8 @@ Square::Square(float x, float y, float length,
 
 void Square::bind()
 {
-    vertexBuffer->addVertexData(position.data(), sizeof(position));
-    indexBuffer->addIndexData(indices.data(), sizeof(indices));
+    vertexBuffer->bind();
+    indexBuffer->bind();
     shader = std::make_unique<Shader>(vertexShader, fragmentShader);
     shader->bind();
     shader->setUniformValue("u_Color", m_r, m_g, m_b, m_a);

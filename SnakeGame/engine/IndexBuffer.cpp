@@ -5,26 +5,22 @@
 #include <GL/glew.h>
 
 
-IndexBuffer::IndexBuffer()
+IndexBuffer::IndexBuffer(std::shared_ptr<std::vector<uint32_t>> data): renderId(0),
+                                                                      isBindedBefore(false),
+                                                                      m_data(data)
 {
     GLCall(glGenBuffers(1, &renderId));
-}
-
-IndexBuffer::IndexBuffer(void* data, int size)
-{
-    GLCall(glGenBuffers(1, &renderId));
-    addIndexData(data, size);
-}
-
-void IndexBuffer::addIndexData(void* data, int size)
-{
-    bind();
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
 }
 
 void IndexBuffer::bind()
 {
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderId));
+    if (!isBindedBefore)
+    {
+        isBindedBefore = true;
+        GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_data->size() * sizeof(uint32_t), m_data->data(), GL_STATIC_DRAW));
+        m_data = nullptr;
+    }
 }
 
 void IndexBuffer::unbind()

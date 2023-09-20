@@ -5,26 +5,24 @@
 #include <GL/glew.h>
 
 
-VertexBuffer::VertexBuffer()
+
+VertexBuffer::VertexBuffer(std::shared_ptr<std::vector<float>> dataPtr) : renderId(0),
+                                                                          isBindedBefore(false),
+                                                                          m_data(dataPtr)
 {
     GLCall(glGenBuffers(1, &renderId));
 }
 
-VertexBuffer::VertexBuffer(void* data, int size)
-{
-    GLCall(glGenBuffers(1, &renderId));
-    addVertexData(data, size);
-}
-
-void VertexBuffer::addVertexData(void* data, int size)
-{
-    bind();
-    GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
-}
 
 void VertexBuffer::bind()
 {
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, renderId));
+    if (!isBindedBefore)
+    {
+        isBindedBefore = true;
+        GLCall(glBufferData(GL_ARRAY_BUFFER, m_data->size() * sizeof(float), m_data->data(), GL_STATIC_DRAW));
+        m_data = nullptr;
+    }
 }
 
 void VertexBuffer::unbind()

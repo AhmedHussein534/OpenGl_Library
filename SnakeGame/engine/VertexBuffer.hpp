@@ -1,21 +1,22 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+#include <cstdint>
 
 class VertexBuffer
 {
 public:
-	VertexBuffer();
-
-	VertexBuffer(void* data, int size);
+	VertexBuffer(std::shared_ptr<std::vector<float>> dataPtr);
 
 	void bind();
 
 	void unbind();
 
-	void addVertexData(void* data, int size);
-
 	~VertexBuffer();
 
 private:
 	unsigned int renderId;
+	bool isBindedBefore;
+	std::shared_ptr<std::vector<float>> m_data;
 };

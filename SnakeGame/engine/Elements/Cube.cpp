@@ -6,7 +6,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW/glfw3.h>
-#include <array>
+#include <vector>
+#include <memory>
+
 Cube::Cube(float x, float y, float length,
     float r, float g, float b, float a, float rotate,
     float rotateAxisX, float rotateAxisY, bool isDataNormalized) : m_x(x),
@@ -19,12 +21,12 @@ Cube::Cube(float x, float y, float length,
     m_rotate(rotate),
     m_rotateAxisX(rotateAxisX),
     m_rotateAxisY(rotateAxisY),
-    vertexBuffer(std::make_unique<VertexBuffer>()),
-    indexBuffer(std::make_unique<IndexBuffer>())
+    vertexBuffer(nullptr),
+    indexBuffer(nullptr)
 {
     vertexElements.emplace_back(3, ElementDataType::FLOAT, true, 3 * sizeof(float));
 
-    position = std::array<float, CUBE_DATA::positionCount>({
+    std::shared_ptr<std::vector<float>> vertexPtr = std::make_shared<std::vector<float>>(std::initializer_list<float>({
         -0.5f, -0.5f, -0.5f,
          0.5f, -0.5f, -0.5f,
          0.5f,  0.5f, -0.5f,
@@ -33,16 +35,18 @@ Cube::Cube(float x, float y, float length,
          0.5f, -0.5f,  0.5f,
          0.5f,  0.5f,  0.5f,
         -0.5f,  0.5f,  0.5f,
-    });
+    }));
 
-    indices = std::array<unsigned int, CUBE_DATA::indexCount>({
+    std::shared_ptr<std::vector<uint32_t>> indexPtr = std::make_shared<std::vector<uint32_t>>(std::initializer_list<uint32_t>({
         0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4,
         7, 3, 0, 0, 4, 7, 6, 2, 1, 1, 5, 6,
         0, 1, 5, 5, 4, 0, 3, 2, 6, 6, 7, 3
-    });
+    }));
+
+    vertexBuffer = std::make_unique<VertexBuffer>(vertexPtr),
+    indexBuffer = std::make_unique<IndexBuffer>(indexPtr);
 
     shader = std::make_unique<Shader>(vertexShader, fragmentShader);
-
 }
 
 
@@ -56,14 +60,16 @@ Cube::Cube(float x, float y, float length,
 
 void Cube::bind()
 {
+    static bool isBind = false;
     glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection = glm::mat4(1.0f);
     model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
     projection = glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
-    vertexBuffer->addVertexData((void*)position.data(), position.size() * sizeof(float));
-    indexBuffer->addIndexData(indices.data(), indices.size() * sizeof(unsigned int));
+
+    vertexBuffer->bind();
+    indexBuffer->bind();
 
     shader->bind();
     shader->setUniformValue("model", 1, false, glm::value_ptr(model));

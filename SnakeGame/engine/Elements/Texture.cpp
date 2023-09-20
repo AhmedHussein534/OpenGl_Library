@@ -15,12 +15,9 @@ Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BP
                                          m_rotate(rotate),
                                          m_rotateAxisX(rotateAxisX),
                                          m_rotateAxisY(rotateAxisY),
-                                         vertexBuffer(std::make_unique<VertexBuffer>()),
-                                         indexBuffer(std::make_unique<IndexBuffer>())
+                                         vertexBuffer(nullptr),
+                                         indexBuffer(nullptr)
 {
-    std::cout << "Texture width = " << m_width << std::endl;
-    std::cout << "Texture height = " << m_height << std::endl;
-    
 	GLCall(glGenTextures(1, &m_rendererId));
 	GLCall(glBindTexture(GL_TEXTURE_2D, m_rendererId));
 	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
@@ -31,44 +28,44 @@ Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BP
 	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_localBuffer));
 	GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 
+    std::shared_ptr<std::vector<float>> vertexData = std::make_shared<std::vector<float>>();
+    std::shared_ptr<std::vector<uint32_t>> indexData = std::make_shared<std::vector<uint32_t>>();
 
-    position[0] = m_x;
-    position[1] = m_y - m_length;
-    position[2] = 0.0f;
-    position[3] = 0.0f;
+    vertexData->push_back(m_x);
+    vertexData->push_back(m_y - m_length);
+    vertexData->push_back(0.0f);
+    vertexData->push_back(0.0f);
+    vertexData->push_back(m_x + m_length);
+    vertexData->push_back(m_y - m_length);
+    vertexData->push_back(1.0f);
+    vertexData->push_back(0.0f);
+    vertexData->push_back(m_x + m_length);
+    vertexData->push_back(m_y);
+    vertexData->push_back(1.0f);
+    vertexData->push_back(1.0f);
+    vertexData->push_back(m_x);
+    vertexData->push_back(m_y);
+    vertexData->push_back(0.0f);
+    vertexData->push_back(1.0f);
 
-    position[4] = m_x + m_length;
-    position[5] = m_y - m_length;
-    position[6] = 1.0f;
-    position[7] = 0.0f;
 
-    position[8] = m_x + m_length;
-    position[9] = m_y;
-    position[10] = 1.0f;
-    position[11] = 1.0f;
-
-    position[12] = m_x;
-    position[13] = m_y;
-    position[14] = 0.0f;
-    position[15] = 1.0f;
-
+    indexData->push_back(0);
+    indexData->push_back(1);
+    indexData->push_back(2);
+    indexData->push_back(2);
+    indexData->push_back(3);
+    indexData->push_back(0);
+    vertexBuffer = std::make_unique<VertexBuffer>(vertexData);
+    indexBuffer  = std::make_unique<IndexBuffer>(indexData);
     vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 4 * sizeof(float));
     vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 4 * sizeof(float));
-    indices[0] = 0;
-    indices[1] = 1;
-    indices[2] = 2;
-    indices[3] = 2;
-    indices[4] = 3;
-    indices[5] = 0;
-    
-    std::cout << "TEXTURE CONSTRUCTOR DONE!" << std::endl;
+    shader = std::make_unique<Shader>(vertexShader, fragmentShader);
 }
 
 void Texture::bind()
 {
-    vertexBuffer->addVertexData(position.data(), sizeof(position));
-    indexBuffer->addIndexData(indices.data(), sizeof(indices));
-    shader = std::make_unique<Shader>(vertexShader, fragmentShader);
+    vertexBuffer->bind();
+    indexBuffer->bind();
     shader->bind();
     shader->setUniformValue("u_Texture", int(0));
     GLCall(glActiveTexture(GL_TEXTURE0 + m_activeSlot));
