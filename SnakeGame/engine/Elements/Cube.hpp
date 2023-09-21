@@ -58,17 +58,20 @@ private:
         "uniform mat4 model;\n"
         "uniform mat4 view;\n"
         "uniform mat4 projection;\n"
+        "out vec4 posColor;\n"
         "void main()\n"
         "{\n"
         "    gl_Position = projection * view * model * position;\n"
+        "    posColor = (position + 1) * 0.5;\n"
         "}\n";
 
     std::string fragmentShader =
         "#version 410 core\n"
         "layout(location = 0) out vec4 color;\n"
+        "in vec4 posColor;\n"
         "void main()\n"
         "{\n"
-        "    color = vec4(1.0,0.0,0.0,1.0);\n"
+        "    color = posColor ;\n"
         "}\n";
 
 

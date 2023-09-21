@@ -40,6 +40,12 @@ void setUniformValue(int location, int32_t f1)
 {
 	GLCall(glUniform1i(location, f1));
 }
+
+template<>
+void setUniformValue(int location,  int count, bool transpose, float *mat)
+{
+    GLCall(glUniformMatrix4fv(location, count, transpose, mat));
+}
 }
 
 Shader::Shader(std::string vertexShader, std::string fragmentShader) : m_vertexShader(vertexShader),
