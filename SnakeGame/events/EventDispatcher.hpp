@@ -12,7 +12,7 @@ class EventDispatcher
         return eventDispatcher;
     }
 
-    void publishEvent(const Event &e)
+    void publishEvent(Event &e)
     {
         for (auto &it : subscriptionMap)
         {
@@ -24,17 +24,17 @@ class EventDispatcher
     }
 
     template<typename T, typename F>
-    bool Dispatch(const Event &m_Event, const F& func)
+    bool Dispatch(Event &m_Event, const F& func)
     {
         if (m_Event.GetEventType() == T::GetStaticType())
         {
-            m_Event.Handled |= func(static_cast<T&>(m_Event));
+            m_Event.Handled |= func(static_cast<const T&>(m_Event));
             return true;
         }
         return false;
     }
 
-    bool subscribeToEvents(uint32_t categories, std::function<void(const Event&)> callback)
+    bool subscribeToEvents(uint32_t categories, std::function<void(Event&)> callback)
     {
         subscriptionMap[categories] = callback;
     }
@@ -42,5 +42,5 @@ class EventDispatcher
 
     private:
     EventDispatcher() = default;
-    std::unordered_map<uint32_t, std::function<void(const Event&)>> subscriptionMap;
+    std::unordered_map<uint32_t, std::function<void(Event&)>> subscriptionMap;
 };

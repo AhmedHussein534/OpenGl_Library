@@ -34,15 +34,24 @@ std::shared_ptr<WindowsWindow> init()
 }
 
 
-void onEvent(const Event& e)
+
+bool shouldClose = false;
+
+bool onCloseTriggered(const WindowCloseEvent &e)
+{
+    shouldClose = true;
+}
+
+void onEvent(Event& e)
 {
     std::cout << e.ToString() << std::endl;
+    EventDispatcher::getInstance().Dispatch<WindowCloseEvent>(e, onCloseTriggered);
 }
 
 
 int main(void)
 {
-    EventDispatcher::getInstance().subscribeToEvents(0xFFFF, onEvent);
+    EventDispatcher::getInstance().subscribeToEvents(EventCategoryKeyboard | EventCategoryApplication, onEvent);
     auto window = init();
     if (window == nullptr)
     {
@@ -55,29 +64,19 @@ int main(void)
         layout->addElement(std::make_shared<Square>(-0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f));
         layouts.push_back(layout);
         bool shouldBreak = false;
-        while (true)
+        while (!shouldClose)
         {
             for (auto& l : layouts)
             {
-                l->draw();
-                /* Swap front and back buffers */
-                window->OnUpdate();
-
-                if (glfwWindowShouldClose((GLFWwindow*)window->GetNativeWindow()))
+                if (!shouldClose)
                 {
-                    shouldBreak = true;
-                    break;
-
+                     l->draw();
+                    /* Swap front and back buffers */
+                    window->OnUpdate();
                 }
-            }
-
-            if (shouldBreak)
-            {
-                break;
             }
         }
     }
 
-    glfwTerminate();
     return 0;
 }
