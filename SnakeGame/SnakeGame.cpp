@@ -13,80 +13,46 @@
 #include "engine/Elements/Cube.hpp"
 #include "StbTexture.hpp"
 
+#include "events/EventDispatcher.hpp"
+#include "window/Windows/WindowsWindow.hpp"
 #define LOG_DEBUG std::cout
 
 #define SWAP_INTERVAL 1
 
-GLFWwindow* createWindow()
+std::shared_ptr<WindowsWindow> init()
 {
-    GLFWwindow* window;
-
-    /* USE CORE INSTEAD OF CAP */
-    /* NOTE: CORE NEEDS VERTEX ARRAY TO BE CREATED */
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(1920, 1080, "Hello World", NULL, NULL);
-    if (!window)
+    std::shared_ptr<WindowsWindow> window = std::make_shared<WindowsWindow>(WindowProps{"Mywindow", 1920, 1080});
+    GLenum err = glewInit();
+    if (err != GLEW_OK)
     {
-        glfwTerminate();
-        return nullptr;
+        std::cout << "ERROR: "
+            << glewGetErrorString(err)
+            << std::endl;
     }
 
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
-
-    /* Update window every 1 second*/
-    glfwSwapInterval(SWAP_INTERVAL);
     return window;
 }
 
-GLFWwindow* init()
+
+void onEvent(const Event& e)
 {
-    GLFWwindow* ret = nullptr;
-    /* Initialize the library */
-    do
-    {
-        if (!glfwInit())
-        {
-            break;
-        }
-
-        GLFWwindow* window = createWindow();
-
-        /* Init Glew wrapper for OPENGL*/
-        GLenum err = glewInit();
-        if (err != GLEW_OK)
-        {
-            std::cout << "ERROR: "
-                << glewGetErrorString(err)
-                << std::endl;
-            break;
-        }
-
-        ret = window;
-        std::cout << glGetString(GL_VERSION) << std::endl;
-    } while (0);
-
-
-    return ret;
+    std::cout << e.ToString() << std::endl;
 }
+
 
 int main(void)
 {
-    GLFWwindow* window = init();
+    EventDispatcher::getInstance().subscribeToEvents(0xFFFF, onEvent);
+    auto window = init();
     if (window == nullptr)
     {
         return -1;
     }
 
     {
-
         std::vector<std::shared_ptr<Layout>> layouts = {};
         std::shared_ptr<Layout> layout = std::make_shared<Layout>();
-        layout->addElement(std::make_shared<Cube>(-0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f));
+        layout->addElement(std::make_shared<Square>(-0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f));
         layouts.push_back(layout);
         bool shouldBreak = false;
         while (true)
@@ -95,12 +61,9 @@ int main(void)
             {
                 l->draw();
                 /* Swap front and back buffers */
-                glfwSwapBuffers(window);
+                window->OnUpdate();
 
-                /* Poll for and process events */
-                glfwPollEvents();
-
-                if (glfwWindowShouldClose(window))
+                if (glfwWindowShouldClose((GLFWwindow*)window->GetNativeWindow()))
                 {
                     shouldBreak = true;
                     break;

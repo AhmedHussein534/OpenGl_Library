@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <vector>
 #include <utility>
+#include <glm/glm.hpp>
 
 enum class ElementDataType : uint32_t
 {

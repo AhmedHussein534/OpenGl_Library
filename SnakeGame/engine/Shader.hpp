@@ -15,7 +15,7 @@ namespace SetUniformDetailed
 class Shader
 {
 public:
-	Shader(std::string vertexShader, std::string fragmentShader);
+	Shader(const std::string &vertexShader, const std::string &fragmentShader);
 
 	void bind();
 

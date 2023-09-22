@@ -5,6 +5,26 @@
 
 #include <cmath>
 
+
+namespace
+{
+    const std::string vertexShader =
+        "#version 410 core\n"
+        "layout(location = 0) in vec4 position;\n"
+        "void main()\n"
+        "{\n"
+        "    gl_Position = position;\n"
+        "}\n";
+
+    const std::string fragmentShader =
+        "#version 410 core\n"
+        "layout(location = 0) out vec4 color;\n"
+        "uniform vec4 u_Color;\n"
+        "void main()\n"
+        "{\n"
+        "    color = u_Color;\n"
+        "}\n";
+}
 Square::Square(float x, float y, float length,
 	float r, float g, float b, float a, float rotate,
     float rotateAxisX, float rotateAxisY, bool isDataNormalized) :  m_x(x),
@@ -18,7 +38,8 @@ Square::Square(float x, float y, float length,
                                                                     m_rotateAxisX(rotateAxisX),
                                                                     m_rotateAxisY(rotateAxisY),
                                                                     vertexBuffer(nullptr),
-                                                                    indexBuffer(nullptr)
+                                                                    indexBuffer(nullptr),
+                                                                    shader(std::make_unique<Shader>(vertexShader, fragmentShader))
 {
 
 
@@ -89,7 +110,6 @@ void Square::bind()
 {
     vertexBuffer->bind();
     indexBuffer->bind();
-    shader = std::make_unique<Shader>(vertexShader, fragmentShader);
     shader->bind();
     shader->setUniformValue("u_Color", m_r, m_g, m_b, m_a);
 }

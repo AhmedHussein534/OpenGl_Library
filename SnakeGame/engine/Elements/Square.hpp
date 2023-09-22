@@ -49,22 +49,4 @@ private:
 	std::unique_ptr<IndexBuffer> indexBuffer;
     std::vector<VertexElement> vertexElements;
     std::unique_ptr<Shader> shader;
-    std::string vertexShader =
-        "#version 410 core\n"
-        "layout(location = 0) in vec4 position;\n"
-        "void main()\n"
-        "{\n"
-        "    gl_Position = position;\n"
-        "}\n";
-
-    std::string fragmentShader =
-        "#version 410 core\n"
-        "layout(location = 0) out vec4 color;\n"
-        "uniform vec4 u_Color;\n"
-        "void main()\n"
-        "{\n"
-        "    color = u_Color;\n"
-        "}\n";
-
-
 };

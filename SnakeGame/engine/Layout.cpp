@@ -5,6 +5,7 @@
 
 Layout::Layout()
 {
+    glEnable(GL_DEPTH_TEST);
     vArray.bind();
 }
 
@@ -30,7 +31,7 @@ void Layout::addElement(std::shared_ptr<IElement> e)
 
 void Layout::draw()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     vArray.bind();
     for (auto& e : elements)

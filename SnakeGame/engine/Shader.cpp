@@ -48,11 +48,10 @@ void setUniformValue(int location,  int count, bool transpose, float *mat)
 }
 }
 
-Shader::Shader(std::string vertexShader, std::string fragmentShader) : m_vertexShader(vertexShader),
+Shader::Shader(const std::string &vertexShader, const std::string &fragmentShader) : m_vertexShader(vertexShader),
                                                                        m_fragmentShader(fragmentShader),
                                                                        program(0)
 {
-    std::cout << "HERE1" << std::endl;
     GLCall(program = glCreateProgram());
     GLCall(unsigned int vs = compileShader(GL_VERTEX_SHADER, m_vertexShader));
     GLCall(unsigned int fs = compileShader(GL_FRAGMENT_SHADER, m_fragmentShader));

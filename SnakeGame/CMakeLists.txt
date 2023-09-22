@@ -37,6 +37,7 @@ add_executable (SnakeGame
 				"engine/Elements/Cube.cpp"
 				"external/stb_image/stb_image.cpp"
 				"external/glew/src/glew.c"
+				"window/Windows/WindowsWindow.cpp"
 				"StbTexture.cpp"
 				)
 

@@ -9,6 +9,32 @@
 #include <vector>
 #include <memory>
 
+namespace{
+    const std::string vertexShader =
+            "#version 410 core\n"
+            "layout(location = 0) in vec4 position;\n"
+            "uniform mat4 model;\n"
+            "uniform mat4 view;\n"
+            "uniform mat4 projection;\n"
+            "out vec4 posColor;\n"
+            "void main()\n"
+            "{\n"
+            "    gl_Position = projection * view * model * position;\n"
+            "    posColor = (position + 1) * 0.5;\n"
+            "}\n";
+
+    const std::string fragmentShader =
+        "#version 410 core\n"
+        "layout(location = 0) out vec4 color;\n"
+        "in vec4 posColor;\n"
+        "void main()\n"
+        "{\n"
+        "    color = posColor ;\n"
+        "}\n";
+}
+
+
+
 Cube::Cube(float x, float y, float length,
     float r, float g, float b, float a, float rotate,
     float rotateAxisX, float rotateAxisY, bool isDataNormalized) : m_x(x),
@@ -22,7 +48,8 @@ Cube::Cube(float x, float y, float length,
     m_rotateAxisX(rotateAxisX),
     m_rotateAxisY(rotateAxisY),
     vertexBuffer(nullptr),
-    indexBuffer(nullptr)
+    indexBuffer(nullptr),
+    shader(std::make_unique<Shader>(vertexShader, fragmentShader))
 {
     vertexElements.emplace_back(3, ElementDataType::FLOAT, true, 3 * sizeof(float));
 
@@ -46,7 +73,7 @@ Cube::Cube(float x, float y, float length,
     vertexBuffer = std::make_unique<VertexBuffer>(vertexPtr),
     indexBuffer = std::make_unique<IndexBuffer>(indexPtr);
 
-    shader = std::make_unique<Shader>(vertexShader, fragmentShader);
+
 }
 
 

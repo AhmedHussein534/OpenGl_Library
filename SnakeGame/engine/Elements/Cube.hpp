@@ -52,27 +52,4 @@ private:
     std::unique_ptr<IndexBuffer> indexBuffer;
     std::vector<VertexElement> vertexElements;
     std::unique_ptr<Shader> shader;
-    std::string vertexShader =
-        "#version 410 core\n"
-        "layout(location = 0) in vec4 position;\n"
-        "uniform mat4 model;\n"
-        "uniform mat4 view;\n"
-        "uniform mat4 projection;\n"
-        "out vec4 posColor;\n"
-        "void main()\n"
-        "{\n"
-        "    gl_Position = projection * view * model * position;\n"
-        "    posColor = (position + 1) * 0.5;\n"
-        "}\n";
-
-    std::string fragmentShader =
-        "#version 410 core\n"
-        "layout(location = 0) out vec4 color;\n"
-        "in vec4 posColor;\n"
-        "void main()\n"
-        "{\n"
-        "    color = posColor ;\n"
-        "}\n";
-
-
 };

@@ -2,6 +2,33 @@
 #include "Renderer.hpp"
 #include <GL/glew.h>
 
+namespace
+{
+
+	const std::string vertexShader =
+		"#version 410 core\n"
+		"layout(location = 0) in vec4 position;\n"
+		"layout(location = 1) in vec2 texCoord;\n"
+		"out vec2 v_TexCoord;\n"
+		"void main()\n"
+		"{\n"
+		"    gl_Position = position;\n"
+		"    v_TexCoord = texCoord;\n"
+		"}\n";
+
+	const std::string fragmentShader =
+		"#version 410 core\n"
+		"layout(location = 0) out vec4 color;\n"
+		"in vec2 v_TexCoord;\n"
+		"uniform sampler2D u_Texture;\n"
+		"void main()\n"
+		"{\n"
+		"    vec4 texColor = texture(u_Texture, v_TexCoord);\n"
+		"    color = texColor;\n"
+		"}\n";
+}
+
+
 Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BPP, uint32_t slot,
                  float x, float y, float length, float rotate, float rotateAxisX, float rotateAxisY) : m_rendererId(0),
                                          m_localBuffer(localBuffer),
@@ -16,7 +43,8 @@ Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BP
                                          m_rotateAxisX(rotateAxisX),
                                          m_rotateAxisY(rotateAxisY),
                                          vertexBuffer(nullptr),
-                                         indexBuffer(nullptr)
+                                         indexBuffer(nullptr),
+                                         shader(std::make_unique<Shader>(vertexShader, fragmentShader))
 {
 	GLCall(glGenTextures(1, &m_rendererId));
 	GLCall(glBindTexture(GL_TEXTURE_2D, m_rendererId));
@@ -59,7 +87,7 @@ Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BP
     indexBuffer  = std::make_unique<IndexBuffer>(indexData);
     vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 4 * sizeof(float));
     vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 4 * sizeof(float));
-    shader = std::make_unique<Shader>(vertexShader, fragmentShader);
+
 }
 
 void Texture::bind()
