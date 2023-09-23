@@ -106,7 +106,7 @@ Square::Square(float x, float y, float length,
 
 }
 
-void Square::bind()
+void Square::bind(const glm::mat4 &viewProjection, const glm::mat4 &model)
 {
     vertexBuffer->bind();
     indexBuffer->bind();

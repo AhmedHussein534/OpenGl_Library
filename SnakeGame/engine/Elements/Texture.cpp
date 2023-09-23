@@ -90,7 +90,7 @@ Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BP
 
 }
 
-void Texture::bind()
+void Texture::bind(const glm::mat4 &viewProjection, const glm::mat4 &model)
 {
     vertexBuffer->bind();
     indexBuffer->bind();

@@ -37,6 +37,7 @@ class EventDispatcher
     bool subscribeToEvents(uint32_t categories, std::function<void(Event&)> callback)
     {
         subscriptionMap[categories] = callback;
+        return true;
     }
 
 

@@ -14,12 +14,11 @@ namespace{
             "#version 410 core\n"
             "layout(location = 0) in vec4 position;\n"
             "uniform mat4 model;\n"
-            "uniform mat4 view;\n"
-            "uniform mat4 projection;\n"
+            "uniform mat4 projectionview;\n"
             "out vec4 posColor;\n"
             "void main()\n"
             "{\n"
-            "    gl_Position = projection * view * model * position;\n"
+            "    gl_Position = projectionview * model * position;\n"
             "    posColor = (position + 1) * 0.5;\n"
             "}\n";
 
@@ -85,23 +84,18 @@ Cube::Cube(float x, float y, float length,
 
 }
 
-void Cube::bind()
+void Cube::bind(const glm::mat4 &viewProjection, const glm::mat4 &model)
 {
     static bool isBind = false;
-    glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 projection = glm::mat4(1.0f);
-    model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    projection = glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
 
+    auto model2 = model;
+    auto projectionview = viewProjection;
     vertexBuffer->bind();
     indexBuffer->bind();
 
     shader->bind();
-    shader->setUniformValue("model", 1, false, glm::value_ptr(model));
-    shader->setUniformValue("view", 1, false, glm::value_ptr(view));
-    shader->setUniformValue("projection", 1, false, glm::value_ptr(projection));
+    shader->setUniformValue("projectionview", 1, false, glm::value_ptr(projectionview));
+    shader->setUniformValue("model", 1, false, glm::value_ptr(model2));
 }
 
 void Cube::unbind()

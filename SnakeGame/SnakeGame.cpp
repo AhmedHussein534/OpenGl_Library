@@ -11,6 +11,7 @@
 #include "engine/Layout.hpp"
 #include "engine/Elements/Square.hpp"
 #include "engine/Elements/Cube.hpp"
+#include "engine/Cameras/OrthographicCamera.hpp"
 #include "StbTexture.hpp"
 
 #include "events/EventDispatcher.hpp"
@@ -40,6 +41,7 @@ bool shouldClose = false;
 bool onCloseTriggered(const WindowCloseEvent &e)
 {
     shouldClose = true;
+    return true;
 }
 
 void onEvent(Event& e)
@@ -59,9 +61,10 @@ int main(void)
     }
 
     {
+        std::shared_ptr<OrthographicCamera> m_camera = std::make_shared<OrthographicCamera>(-1.0f, 1.0f, -1.0f, 1.0f);
         std::vector<std::shared_ptr<Layout>> layouts = {};
-        std::shared_ptr<Layout> layout = std::make_shared<Layout>();
-        layout->addElement(std::make_shared<Square>(-0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f));
+        std::shared_ptr<Layout> layout = std::make_shared<Layout>(m_camera);
+        layout->addElement(std::make_shared<Cube>(-0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f));
         layouts.push_back(layout);
         bool shouldBreak = false;
         while (!shouldClose)

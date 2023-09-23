@@ -24,7 +24,7 @@ public:
         float rotate = 0.0f, bool isDataNormalized = true);
 
 
-	void bind() override;
+	void bind(const glm::mat4 &viewProjection, const glm::mat4 &model) override;
 
 	void unbind() override;
 

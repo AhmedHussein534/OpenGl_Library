@@ -35,6 +35,7 @@ add_executable (SnakeGame
 				"engine/Elements/Square.cpp"
 				"engine/Elements/Texture.cpp"
 				"engine/Elements/Cube.cpp"
+				"engine/Cameras/OrthographicCamera.cpp"
 				"external/stb_image/stb_image.cpp"
 				"external/glew/src/glew.c"
 				"window/Windows/WindowsWindow.cpp"

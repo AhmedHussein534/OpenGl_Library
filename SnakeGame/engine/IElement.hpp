@@ -44,7 +44,7 @@ struct VertexElement
 class IElement
 {
 public:
-	virtual void bind() = 0;
+	virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f), const glm::mat4 &model = glm::mat4(1.0f)) = 0;
 
 	virtual void unbind() = 0;
 

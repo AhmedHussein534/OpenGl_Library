@@ -3,7 +3,7 @@
 #include <type_traits>
 #include <iostream>
 
-Layout::Layout()
+Layout::Layout(std::shared_ptr<ICamera> camera) : m_camera(camera)
 {
     glEnable(GL_DEPTH_TEST);
     vArray.bind();
@@ -32,11 +32,17 @@ void Layout::addElement(std::shared_ptr<IElement> e)
 void Layout::draw()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    static float rotation = 0.0f;
+    static float m_x = 0.0f;
+    static float m_y = 0.0f;
+    static float m_z = 0.0f;
+    static float z_step = 0.01f;
+    m_camera->SetPosition({m_x, m_y, m_z});
+    m_camera->SetRotation(rotation, {0, 0.5, 0.5});
     vArray.bind();
     for (auto& e : elements)
     {
-        e->bind();
+        e->bind(m_camera->GetViewProjectionMatrix());
         uint32_t index = 0;
         const auto& vertexElements = e->getVertexElements();
         int offset = 0;
@@ -56,9 +62,9 @@ void Layout::draw()
 
 
        glDrawElements(GL_TRIANGLES, e->getIndicesCount(), GL_UNSIGNED_INT, nullptr);
-
-
     }
+
+    rotation += 0.1f;
 }
 
 

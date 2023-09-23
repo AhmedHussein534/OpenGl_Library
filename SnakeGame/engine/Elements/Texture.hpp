@@ -22,7 +22,7 @@ public:
 	Texture(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BPP, uint32_t slot,
 		    float x, float y, float length, float rotate, float rotateAxisX, float rotateAxisY);
 
-	void bind() override;
+	void bind(const glm::mat4 &viewProjection, const glm::mat4 &model) override;
 
 	void unbind() override;
 
