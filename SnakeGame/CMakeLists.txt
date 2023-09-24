@@ -34,12 +34,13 @@ add_executable (SnakeGame
 				"engine/Layout.cpp"
 				"engine/Elements/Square.cpp"
 				"engine/Elements/Texture.cpp"
+				"engine/Elements/Texture3D.cpp"
 				"engine/Elements/Cube.cpp"
 				"engine/Cameras/OrthographicCamera.cpp"
+				"engine/Cameras/PerspectiveCamera.cpp"
 				"external/stb_image/stb_image.cpp"
 				"external/glew/src/glew.c"
 				"window/Windows/WindowsWindow.cpp"
-				"StbTexture.cpp"
 				)
 
 target_link_libraries(SnakeGame

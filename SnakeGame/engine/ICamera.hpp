@@ -18,17 +18,13 @@ class ICamera
 		virtual ~ICamera() = default;
 
         const glm::vec3& GetPosition() const { return m_Position; }
-		void SetPosition(const glm::vec3& position)
+        const glm::vec3& GetTarget() const { return m_target; }
+        const glm::vec3& GetUp() const { return m_up; }
+		void setDirection(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up=glm::vec3(0.0f, 1.0f, 0.0f))
         {
             m_Position = position;
-            RecalculateViewMatrix();
-        }
-
-		float GetRotation() const { return m_Rotation; }
-		void SetRotation(float rotation, glm::vec3 rotationAxis = {0, 0, 1})
-        {
-            m_Rotation = rotation;
-            m_rotationAxis = rotationAxis;
+            m_target = target;
+            m_up = up;
             RecalculateViewMatrix();
         }
 
@@ -42,17 +38,22 @@ class ICamera
 	protected:
         virtual void RecalculateViewMatrix()
         {
-            glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_Position) *
-                glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), m_rotationAxis);
 
-            m_ViewMatrix = glm::inverse(transform);
+            m_ViewMatrix = glm::lookAt(m_Position,
+                                       m_target,
+                                       m_up);
+
+            //glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_Position);
+            //m_ViewMatrix = glm::inverse(transform);
+            std::cout << glm::to_string(m_ViewMatrix) << std::endl;
             m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
         }
 
 		glm::mat4 m_ProjectionMatrix;
 		glm::mat4 m_ViewMatrix;
 		glm::mat4 m_ViewProjectionMatrix;
-        float m_Rotation = 0.0f;
-        glm::vec3 m_rotationAxis = {0, 0, 1};
         glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
+        glm::vec3 m_target = { 0.0f, 0.0f, 0.0f };
+        glm::vec3 m_up = { 0.0f, 1.0f, 0.0f };
+
 };

@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <memory>
+#include <type_traits>
 
 namespace{
     const std::string vertexShader =
@@ -15,52 +16,46 @@ namespace{
             "layout(location = 0) in vec4 position;\n"
             "uniform mat4 model;\n"
             "uniform mat4 projectionview;\n"
-            "out vec4 posColor;\n"
             "void main()\n"
             "{\n"
             "    gl_Position = projectionview * model * position;\n"
-            "    posColor = (position + 1) * 0.5;\n"
             "}\n";
 
     const std::string fragmentShader =
         "#version 410 core\n"
         "layout(location = 0) out vec4 color;\n"
-        "in vec4 posColor;\n"
+        "uniform vec4 inputColor;\n"
         "void main()\n"
         "{\n"
-        "    color = posColor ;\n"
+        "    color = inputColor ;\n"
         "}\n";
 }
 
 
 
-Cube::Cube(float x, float y, float length,
-    float r, float g, float b, float a, float rotate,
-    float rotateAxisX, float rotateAxisY, bool isDataNormalized) : m_x(x),
-    m_y(y),
-    m_length(length),
-    m_r(r),
-    m_g(g),
-    m_b(b),
-    m_a(a),
-    m_rotate(rotate),
-    m_rotateAxisX(rotateAxisX),
-    m_rotateAxisY(rotateAxisY),
-    vertexBuffer(nullptr),
-    indexBuffer(nullptr),
-    shader(std::make_unique<Shader>(vertexShader, fragmentShader))
+Cube::Cube(float x, float y, float z, float length,
+           float r, float g, float b, float a, bool isDataNormalized) : m_x(x),
+                                                                        m_y(y),
+                                                                        m_length(length),
+                                                                        m_r(r),
+                                                                        m_g(g),
+                                                                        m_b(b),
+                                                                        m_a(a),
+                                                                        vertexBuffer(nullptr),
+                                                                        indexBuffer(nullptr),
+                                                                        shader(std::make_unique<Shader>(vertexShader, fragmentShader))
 {
     vertexElements.emplace_back(3, ElementDataType::FLOAT, true, 3 * sizeof(float));
 
     std::shared_ptr<std::vector<float>> vertexPtr = std::make_shared<std::vector<float>>(std::initializer_list<float>({
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
+        -x, -y, z - m_length,
+         x, -y, z - m_length,
+         x,  y, z - m_length,
+        -x,  y, z - m_length,
+        -x, -y,  z,
+         x, -y,  z,
+         x,  y,  z,
+        -x,  y,  z,
     }));
 
     std::shared_ptr<std::vector<uint32_t>> indexPtr = std::make_shared<std::vector<uint32_t>>(std::initializer_list<uint32_t>({
@@ -75,27 +70,15 @@ Cube::Cube(float x, float y, float length,
 
 }
 
-
-
-Cube::Cube(float x, float y, float length,
-    float r, float g, float b, float a,
-    float rotate, bool isDataNormalized) : Cube(x, y, length, r, g, b, a, rotate, x + length / 2, y - length / 2, isDataNormalized)
+void Cube::bind(const glm::mat4 &viewProjection)
 {
-
-}
-
-void Cube::bind(const glm::mat4 &viewProjection, const glm::mat4 &model)
-{
-    static bool isBind = false;
-
-    auto model2 = model;
-    auto projectionview = viewProjection;
     vertexBuffer->bind();
     indexBuffer->bind();
 
     shader->bind();
-    shader->setUniformValue("projectionview", 1, false, glm::value_ptr(projectionview));
-    shader->setUniformValue("model", 1, false, glm::value_ptr(model2));
+    shader->setUniformValue("projectionview", 1, false, const_cast<float*>(glm::value_ptr(viewProjection)));
+    shader->setUniformValue("model", 1, false, const_cast<float*>(glm::value_ptr(*m_model)));
+    shader->setUniformValue("inputColor", m_r, m_g, m_b, m_a);
 }
 
 void Cube::unbind()

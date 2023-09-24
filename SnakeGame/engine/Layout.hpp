@@ -10,7 +10,7 @@
 class Layout
 {
 public:
-	Layout(std::shared_ptr<ICamera> camera);
+	Layout();
 
 	void bind();
 
@@ -20,11 +20,9 @@ public:
 
 	~Layout();
 
-	void draw();
+	void draw(std::shared_ptr<ICamera> camera);
 
 private:
 	std::vector<std::shared_ptr<IElement>> elements;
 	VertexArray vArray;
-	std::shared_ptr<ICamera> m_camera;
-
 };

@@ -18,16 +18,10 @@ namespace CUBE_DATA
 class Cube : public IElement
 {
 public:
-    Cube(float x, float y, float length,
-        float r, float g, float b, float a,
-        float rotate, float rotateAxisX, float rotateAxisY, bool isDataNormalized = true);
+    Cube(float x, float y, float z, float length,
+        float r=1.0f, float g=1.0f, float b=1.0f, float a=1.0f, bool isDataNormalized = true);
 
-    Cube(float x, float y, float length,
-        float r, float g, float b, float a,
-        float rotate = 0.0f, bool isDataNormalized = true);
-
-
-    void bind(const glm::mat4 &viewProjection, const glm::mat4 &model) override;
+    void bind(const glm::mat4 &viewProjection) override;
 
     void unbind() override;
 
@@ -44,10 +38,6 @@ private:
     float m_g;
     float m_b;
     float m_a;
-    float m_rotate;
-    float m_rotateAxisX;
-    float m_rotateAxisY;
-
     std::unique_ptr<VertexBuffer> vertexBuffer;
     std::unique_ptr<IndexBuffer> indexBuffer;
     std::vector<VertexElement> vertexElements;

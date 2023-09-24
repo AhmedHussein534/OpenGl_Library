@@ -12,8 +12,9 @@
 #include "engine/Elements/Square.hpp"
 #include "engine/Elements/Cube.hpp"
 #include "engine/Cameras/OrthographicCamera.hpp"
-#include "StbTexture.hpp"
-
+#include "engine/Cameras/PerspectiveCamera.hpp"
+#include "engine/Elements/Texture.hpp"
+#include "engine/Elements/Texture3D.hpp"
 #include "events/EventDispatcher.hpp"
 #include "window/Windows/WindowsWindow.hpp"
 #define LOG_DEBUG std::cout
@@ -61,19 +62,36 @@ int main(void)
     }
 
     {
-        std::shared_ptr<OrthographicCamera> m_camera = std::make_shared<OrthographicCamera>(-1.0f, 1.0f, -1.0f, 1.0f);
+        // std::shared_ptr<PerspectiveCamera> m_camera = std::make_shared<PerspectiveCamera>(90.0f, 1920.0f/1080.0f, 0.1f, 100.0f);
+        std::shared_ptr<OrthographicCamera> m_camera = std::make_shared<OrthographicCamera>(4.0f, -4.0f, -4.0f, 4.0f);
         std::vector<std::shared_ptr<Layout>> layouts = {};
-        std::shared_ptr<Layout> layout = std::make_shared<Layout>(m_camera);
-        layout->addElement(std::make_shared<Cube>(-0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f));
+        std::shared_ptr<Layout> layout = std::make_shared<Layout>();
+
+        auto texture3D = std::make_shared<StbTexture3D>("res/smile.png")->getTex();
+        auto model = texture3D->getModel();
+
+        layout->addElement(texture3D);
         layouts.push_back(layout);
         bool shouldBreak = false;
         while (!shouldClose)
         {
+             *model = glm::rotate(*model, glm::radians(1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            /*
+            static float m_x = -1.0f;
+            static float m_y = 0.5f;
+            static float m_z = 1.0f;
+
+            float time = glfwGetTime();
+            m_x = sin(time) / 2.0f;
+            m_z = cos(time) / 2.0f;
+
+            m_camera->setDirection({m_x, m_y, m_z}, { 0.0f, 0.0f, 0.0f });
+            */
             for (auto& l : layouts)
             {
                 if (!shouldClose)
                 {
-                     l->draw();
+                     l->draw(m_camera);
                     /* Swap front and back buffers */
                     window->OnUpdate();
                 }

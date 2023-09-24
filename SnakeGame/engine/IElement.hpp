@@ -3,6 +3,7 @@
 #include <vector>
 #include <utility>
 #include <glm/glm.hpp>
+#include <memory>
 
 enum class ElementDataType : uint32_t
 {
@@ -44,11 +45,29 @@ struct VertexElement
 class IElement
 {
 public:
-	virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f), const glm::mat4 &model = glm::mat4(1.0f)) = 0;
+	IElement() : m_model(std::make_shared<glm::mat4>(1.0f))
+	{
+
+	}
+
+	IElement(std::shared_ptr<glm::mat4> model) : m_model(model)
+	{
+
+	}
+
+	virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f)) = 0;
 
 	virtual void unbind() = 0;
 
 	virtual const std::vector<VertexElement>& getVertexElements() = 0;
 
 	virtual unsigned int getIndicesCount() = 0;
+
+	std::shared_ptr<glm::mat4> getModel()
+	{
+		return m_model;
+	}
+
+protected:
+	std::shared_ptr<glm::mat4> m_model;
 };

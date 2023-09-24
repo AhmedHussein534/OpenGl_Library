@@ -10,11 +10,11 @@
 #include "IndexBuffer.hpp"
 
 
-class Texture : public IElement
+class Texture3D : public IElement
 {
 public:
-	Texture(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BPP, uint32_t slot,
-		    float x, float y, float length, float rotate, float rotateAxisX, float rotateAxisY);
+	Texture3D(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BPP, uint32_t slot,
+		    float x, float y, float z, float length, float rotate, float rotateAxisX, float rotateAxisY);
 
 	void bind(const glm::mat4 &viewProjection) override;
 
@@ -24,7 +24,7 @@ public:
 
 	unsigned int getIndicesCount() override;
 
-	~Texture();
+	~Texture3D();
 
 private:
 
@@ -36,6 +36,7 @@ private:
 	uint32_t m_activeSlot;
 	float m_x;
 	float m_y;
+    float m_z;
 	float m_length;
 	float m_rotate;
 	float m_rotateAxisX;
@@ -46,15 +47,14 @@ private:
 	std::vector<VertexElement> vertexElements;
 };
 
-
-class StbTexture
+class StbTexture3D
 {
 public:
-	StbTexture(const std::string& path);
+	StbTexture3D(const std::string& path);
 
-	std::shared_ptr<Texture> getTex();
+	std::shared_ptr<Texture3D> getTex();
 
-	~StbTexture();
+	~StbTexture3D();
 private:
-	std::shared_ptr<Texture> texPtr;
+	std::shared_ptr<Texture3D> texPtr;
 };
