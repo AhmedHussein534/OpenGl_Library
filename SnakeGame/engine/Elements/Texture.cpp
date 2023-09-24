@@ -40,6 +40,7 @@ Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height,
 																			   m_activeSlot(slot),
 																			   m_x(x),
 																			   m_y(y),
+																			   m_center(x+length/2.0f,y-length/2.0f,0.0f),
 																			   vertexBuffer(nullptr),
 																			   indexBuffer(nullptr),
 																			   shader(std::make_unique<Shader>(vertexShader, fragmentShader))
@@ -102,14 +103,7 @@ void Texture::bind(const glm::mat4 &viewProjection)
 
 glm::vec3 Texture::getCenter()
 {
-    float halfLen = m_length / 2.0f;
-    glm::vec3 center = {
-                        m_x + halfLen,
-                        m_y - halfLen,
-                        0
-                        };
-
-    return center;
+    return *m_model * glm::vec4(m_center, 1.0f);
 }
 
 void Texture::unbind()

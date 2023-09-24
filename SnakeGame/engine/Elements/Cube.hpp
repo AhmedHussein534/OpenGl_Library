@@ -41,6 +41,7 @@ private:
     float m_g;
     float m_b;
     float m_a;
+    glm::vec3 m_center;
     std::unique_ptr<VertexBuffer> vertexBuffer;
     std::unique_ptr<IndexBuffer> indexBuffer;
     std::vector<VertexElement> vertexElements;

@@ -37,18 +37,19 @@ namespace
 
 Texture3D::Texture3D(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BPP, uint32_t slot,
                  float x, float y, float z, float length, float rotate, float rotateAxisX, float rotateAxisY) : m_rendererId(0),
-                                         m_localBuffer(localBuffer),
-	                                     m_width(width),
-	                                     m_height(height),
-                                         m_length(length),
-	                                     m_BPP(BPP),
-	                                     m_activeSlot(slot),
-                                         m_x(x),
-                                         m_y(y),
-                                         m_z(z),
-                                         vertexBuffer(nullptr),
-                                         indexBuffer(nullptr),
-                                         shader(std::make_unique<Shader>(vertexShader, fragmentShader))
+                                                                                                                m_localBuffer(localBuffer),
+                                                                                                                m_width(width),
+                                                                                                                m_height(height),
+                                                                                                                m_length(length),
+                                                                                                                m_BPP(BPP),
+                                                                                                                m_activeSlot(slot),
+                                                                                                                m_x(x),
+                                                                                                                m_y(y),
+                                                                                                                m_z(z),
+                                                                                                                m_center(x+length/2.0f,y-length/2.0f,z-length/2.0f),
+                                                                                                                vertexBuffer(nullptr),
+                                                                                                                indexBuffer(nullptr),
+                                                                                                                shader(std::make_unique<Shader>(vertexShader, fragmentShader))
 {
 	GLCall(glGenTextures(1, &m_rendererId));
 	GLCall(glBindTexture(GL_TEXTURE_2D, m_rendererId));
@@ -331,14 +332,7 @@ Texture3D::Texture3D(uint8_t* localBuffer, int32_t width, int32_t height, int32_
 
 glm::vec3 Texture3D::getCenter()
 {
-    float halfLen = m_length / 2.0f;
-    glm::vec3 center = {
-                        m_x + halfLen,
-                        m_y - halfLen,
-                        m_z - halfLen
-                        };
-
-    return center;
+    return *m_model * glm::vec4(m_center, 1.0f);
 }
 
 void Texture3D::bind(const glm::mat4 &viewProjection)

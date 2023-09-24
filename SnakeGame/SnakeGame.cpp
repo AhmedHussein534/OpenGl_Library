@@ -6,6 +6,7 @@
 #include <chrono>
 #include <windows.h>
 #include <unistd.h>
+#include <bits/stdc++.h>
 
 #include "external\glm\glm\gtx\rotate_vector.hpp"
 #include "engine/IndexBuffer.hpp"
@@ -44,8 +45,10 @@ enum class MOVE_DIRECTION : uint32_t
 bool shouldClose = false;
 const uint32_t wormLen = 4;
 const float wormPieceSize = 0.045f;
+const float wormPieceVisible = 0.045f * 0.8f;
 const float startYPos = wormPieceSize / 2.0f;
 MOVE_DIRECTION moveDirection = MOVE_DIRECTION::UP;
+WormPiece* food = nullptr;
 
 glm::vec3 getDirectionUnitVector(MOVE_DIRECTION direction)
 {
@@ -116,21 +119,19 @@ bool onKeyReleased(const KeyReleasedEvent &e)
 
 void onEvent(Event& e)
 {
-    std::cout << e.ToString() << std::endl;
-    EventDispatcher::getInstance().Dispatch<WindowCloseEvent>(e, onCloseTriggered);
+    std::cout << e.GetName() << std::endl;
     EventDispatcher::getInstance().Dispatch<KeyReleasedEvent>(e, onKeyReleased);
+    EventDispatcher::getInstance().Dispatch<WindowCloseEvent>(e, onCloseTriggered);
+
 }
 
 
 void initWorm(Worm &worm,  std::shared_ptr<Layout> layout)
 {
     float currentXPiecePos = 0.0f - (wormPieceSize / 2.0f);
-    float red = 0.2f;
-    float blue = 0.2f;
-    float green = 0.2f;
     for (uint32_t i = 0; i < wormLen; i++)
     {
-        auto piece = std::make_shared<Square>(currentXPiecePos, startYPos, wormPieceSize);
+        auto piece = std::make_shared<Square>(currentXPiecePos, startYPos, wormPieceVisible); //only draw 80% of each size to leave gap
         worm.push_back(piece);
         layout->addElement(piece);
         currentXPiecePos += wormPieceSize;
@@ -159,6 +160,16 @@ void moveWorm(Worm &worm, float step = wormPieceSize, MOVE_DIRECTION direction =
 
 }
 
+void createRandomFood(std::shared_ptr<Layout> layout)
+{
+    std::default_random_engine gen;
+    std::uniform_real_distribution<float> distribution(-0.9,
+                                                   0.9);
+    auto foodShared= std::make_shared<WormPiece>(distribution(gen), distribution(gen), wormPieceVisible);
+
+    layout->addElement(foodShared);
+    food = foodShared.get();
+}
 
 int main(void)
 {
@@ -172,30 +183,33 @@ int main(void)
         return -1;
     }
 
+
+    std::shared_ptr<OrthographicCamera> m_camera = std::make_shared<OrthographicCamera>(-1.0f * aspectRatio, 1.0f * aspectRatio, -1.0f, 1.0f);
+    std::vector<std::shared_ptr<Layout>> layouts = {};
+    std::shared_ptr<Layout> wormLayout = std::make_shared<Layout>();
+    Worm worm = {};
+    initWorm(worm, wormLayout);
+    createRandomFood(wormLayout);
+    layouts.push_back(wormLayout);
+
+    while (!shouldClose)
     {
-        std::shared_ptr<OrthographicCamera> m_camera = std::make_shared<OrthographicCamera>(-1.0f * aspectRatio, 1.0f * aspectRatio, -1.0f, 1.0f);
-        std::vector<std::shared_ptr<Layout>> layouts = {};
-        std::shared_ptr<Layout> wormLayout = std::make_shared<Layout>();
-        Worm worm = {};
-        initWorm(worm, wormLayout);
-        layouts.push_back(wormLayout);
-
-        while (!shouldClose)
+        for (auto& l : layouts)
         {
-            for (auto& l : layouts)
+            if (!shouldClose)
             {
-                if (!shouldClose)
-                {
-                     l->draw(m_camera);
-                    /* Swap front and back buffers */
-                    window->OnUpdate();
-                }
+                l->draw(m_camera);
+                /* Swap front and back buffers */
+                window->OnUpdate();
             }
-
-            float step = time.getDelta<std::milli>() * wormPieceSize / 1000.0f;
-            moveWorm(worm, step * 2, moveDirection);
         }
+
+        moveWorm(worm, wormPieceSize, moveDirection);
+        usleep(100000);
     }
+
+
+
 
     return 0;
 }

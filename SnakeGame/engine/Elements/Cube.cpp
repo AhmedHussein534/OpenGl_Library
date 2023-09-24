@@ -42,6 +42,7 @@ Cube::Cube(float x, float y, float z, float length,
                                                                         m_g(g),
                                                                         m_b(b),
                                                                         m_a(a),
+                                                                        m_center(x+length/2.0f,y-length/2.0f,z-length/2.0f),
                                                                         vertexBuffer(nullptr),
                                                                         indexBuffer(nullptr),
                                                                         shader(std::make_unique<Shader>(vertexShader, fragmentShader))
@@ -102,12 +103,5 @@ const std::vector<VertexElement>& Cube::getVertexElements()
 
 glm::vec3 Cube::getCenter()
 {
-    float halfLen = m_length / 2.0f;
-    glm::vec3 center = {
-                        m_x + halfLen,
-                        m_y - halfLen,
-                        m_z - halfLen
-                        };
-
-    return center;
+    return *m_model * glm::vec4(m_center, 1.0f);
 }

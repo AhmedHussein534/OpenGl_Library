@@ -40,6 +40,7 @@ private:
 	float m_x;
 	float m_y;
 	float m_length;
+	glm::vec3 m_center;
 	std::unique_ptr<VertexBuffer> vertexBuffer;
 	std::unique_ptr<IndexBuffer> indexBuffer;
 	std::unique_ptr<Shader> shader;
