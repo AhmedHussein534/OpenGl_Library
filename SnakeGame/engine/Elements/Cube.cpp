@@ -36,6 +36,7 @@ namespace{
 Cube::Cube(float x, float y, float z, float length,
            float r, float g, float b, float a, bool isDataNormalized) : m_x(x),
                                                                         m_y(y),
+                                                                        m_z(z),
                                                                         m_length(length),
                                                                         m_r(r),
                                                                         m_g(g),
@@ -97,4 +98,16 @@ unsigned int Cube::getIndicesCount()
 const std::vector<VertexElement>& Cube::getVertexElements()
 {
     return vertexElements;
+}
+
+glm::vec3 Cube::getCenter()
+{
+    float halfLen = m_length / 2.0f;
+    glm::vec3 center = {
+                        m_x + halfLen,
+                        m_y - halfLen,
+                        m_z - halfLen
+                        };
+
+    return center;
 }

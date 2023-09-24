@@ -24,6 +24,8 @@ public:
 
 	unsigned int getIndicesCount() override;
 
+	virtual glm::vec3 getCenter() override;
+
 	~Texture3D();
 
 private:

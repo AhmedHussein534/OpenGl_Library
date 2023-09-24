@@ -10,11 +10,12 @@
 #include "IndexBuffer.hpp"
 
 
+
 class Texture : public IElement
 {
 public:
-	Texture(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BPP, uint32_t slot,
-		    float x, float y, float length, float rotate, float rotateAxisX, float rotateAxisY);
+	Texture(uint8_t* localBuffer, int32_t width, int32_t height,
+	        int32_t BPP, uint32_t slot, float x, float y, float length);
 
 	void bind(const glm::mat4 &viewProjection) override;
 
@@ -23,6 +24,8 @@ public:
 	const std::vector<VertexElement>& getVertexElements() override;
 
 	unsigned int getIndicesCount() override;
+
+	virtual glm::vec3 getCenter() override;
 
 	~Texture();
 
@@ -37,9 +40,6 @@ private:
 	float m_x;
 	float m_y;
 	float m_length;
-	float m_rotate;
-	float m_rotateAxisX;
-	float m_rotateAxisY;
 	std::unique_ptr<VertexBuffer> vertexBuffer;
 	std::unique_ptr<IndexBuffer> indexBuffer;
 	std::unique_ptr<Shader> shader;

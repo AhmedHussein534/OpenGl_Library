@@ -26,6 +26,8 @@ public:
 
     unsigned int getIndicesCount() override;
 
+    virtual glm::vec3 getCenter() override;
+
 
 private:
     float m_x;
@@ -35,10 +37,7 @@ private:
     float m_g;
     float m_b;
     float m_a;
-    float m_rotate;
-    float m_rotateAxisX;
-    float m_rotateAxisY;
-
+    glm::vec3 m_center;
 	std::unique_ptr<VertexBuffer> vertexBuffer;
 	std::unique_ptr<IndexBuffer> indexBuffer;
     std::vector<VertexElement> vertexElements;

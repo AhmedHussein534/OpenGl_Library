@@ -30,19 +30,19 @@ namespace
 }
 
 
-Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BPP, uint32_t slot,
-                 float x, float y, float length, float rotate, float rotateAxisX, float rotateAxisY) : m_rendererId(0),
-                                         m_localBuffer(localBuffer),
-	                                     m_width(width),
-	                                     m_height(height),
-                                         m_length(length),
-	                                     m_BPP(BPP),
-	                                     m_activeSlot(slot),
-                                         m_x(x),
-                                         m_y(y),
-                                         vertexBuffer(nullptr),
-                                         indexBuffer(nullptr),
-                                         shader(std::make_unique<Shader>(vertexShader, fragmentShader))
+Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height,
+                 int32_t BPP, uint32_t slot, float x, float y, float length) : m_rendererId(0),
+																			   m_localBuffer(localBuffer),
+																			   m_width(width),
+																			   m_height(height),
+																			   m_length(length),
+																			   m_BPP(BPP),
+																			   m_activeSlot(slot),
+																			   m_x(x),
+																			   m_y(y),
+																			   vertexBuffer(nullptr),
+																			   indexBuffer(nullptr),
+																			   shader(std::make_unique<Shader>(vertexShader, fragmentShader))
 {
 	GLCall(glGenTextures(1, &m_rendererId));
 	GLCall(glBindTexture(GL_TEXTURE_2D, m_rendererId));
@@ -100,6 +100,18 @@ void Texture::bind(const glm::mat4 &viewProjection)
     GLCall(glEnable(GL_BLEND));
 }
 
+glm::vec3 Texture::getCenter()
+{
+    float halfLen = m_length / 2.0f;
+    glm::vec3 center = {
+                        m_x + halfLen,
+                        m_y - halfLen,
+                        0
+                        };
+
+    return center;
+}
+
 void Texture::unbind()
 {
 	GLCall(glActiveTexture(GL_TEXTURE0 + m_activeSlot));
@@ -133,14 +145,9 @@ StbTexture::StbTexture(const std::string &path)
 	int bpp = 0;
 	stbi_set_flip_vertically_on_load(1);
 	uint8_t* m_localBuffer = stbi_load(path.c_str(), &width, &height, &bpp, 4);
-
-	std::cout << std::endl;
-	std::cout << "Width = " << width << std::endl;
-	std::cout << "HEIGHT = " << height << std::endl;
-	std::cout << "BPP = " << bpp << std::endl;
 	if (m_localBuffer)
 	{
-		texPtr = std::make_shared<Texture>(m_localBuffer, width, height, bpp, 0, -1.0f, 1.0f, 2.0f, 0.0f, -1.0f, 1.0f);
+		texPtr = std::make_shared<Texture>(m_localBuffer, width, height, bpp, 0, -1.0f, 1.0f, 2.0f);
 		stbi_image_free(m_localBuffer);
 	}
 	else

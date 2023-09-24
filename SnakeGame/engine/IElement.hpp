@@ -63,6 +63,8 @@ public:
 
 	virtual unsigned int getIndicesCount() = 0;
 
+	virtual glm::vec3 getCenter() = 0;
+
 	std::shared_ptr<glm::mat4> getModel()
 	{
 		return m_model;

@@ -329,6 +329,18 @@ Texture3D::Texture3D(uint8_t* localBuffer, int32_t width, int32_t height, int32_
 
 }
 
+glm::vec3 Texture3D::getCenter()
+{
+    float halfLen = m_length / 2.0f;
+    glm::vec3 center = {
+                        m_x + halfLen,
+                        m_y - halfLen,
+                        m_z - halfLen
+                        };
+
+    return center;
+}
+
 void Texture3D::bind(const glm::mat4 &viewProjection)
 {
     vertexBuffer->bind();

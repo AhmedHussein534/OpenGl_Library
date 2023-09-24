@@ -4,6 +4,7 @@
 
 #include "Square.hpp"
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 
 namespace
@@ -36,6 +37,7 @@ Square::Square(float x, float y, float length,
                                                                   m_g(g),
                                                                   m_b(b),
                                                                   m_a(a),
+                                                                  m_center(x+length/2.0f,y-length/2.0f,0.0f),
                                                                   vertexBuffer(nullptr),
                                                                   indexBuffer(nullptr),
                                                                   shader(std::make_unique<Shader>(vertexShader, fragmentShader))
@@ -116,4 +118,10 @@ unsigned int Square::getIndicesCount()
 const std::vector<VertexElement>& Square::getVertexElements()
 {
     return vertexElements;
+}
+
+
+glm::vec3 Square::getCenter()
+{
+    return *m_model * glm::vec4(m_center, 1.0f);
 }

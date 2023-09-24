@@ -29,10 +29,13 @@ public:
 
     unsigned int getIndicesCount() override;
 
+    virtual glm::vec3 getCenter() override;
+
 
 private:
     float m_x;
     float m_y;
+    float m_z;
     float m_length;
     float m_r;
     float m_g;
