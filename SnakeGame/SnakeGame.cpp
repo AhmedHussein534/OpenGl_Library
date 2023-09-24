@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include "external\glm\glm\gtx\rotate_vector.hpp"
 
 #include "engine/IndexBuffer.hpp"
 #include "engine/VertexBuffer.hpp"
@@ -17,6 +18,7 @@
 #include "engine/Elements/Texture3D.hpp"
 #include "events/EventDispatcher.hpp"
 #include "window/Windows/WindowsWindow.hpp"
+
 #define LOG_DEBUG std::cout
 
 #define SWAP_INTERVAL 1
@@ -63,7 +65,7 @@ int main(void)
 
     {
         // std::shared_ptr<PerspectiveCamera> m_camera = std::make_shared<PerspectiveCamera>(90.0f, 1920.0f/1080.0f, 0.1f, 100.0f);
-        std::shared_ptr<OrthographicCamera> m_camera = std::make_shared<OrthographicCamera>(4.0f, -4.0f, -4.0f, 4.0f);
+        std::shared_ptr<OrthographicCamera> m_camera = std::make_shared<OrthographicCamera>(-4.0f, 4.0f, -4.0f, 4.0f);
         std::vector<std::shared_ptr<Layout>> layouts = {};
         std::shared_ptr<Layout> layout = std::make_shared<Layout>();
 
@@ -73,20 +75,16 @@ int main(void)
         layout->addElement(texture3D);
         layouts.push_back(layout);
         bool shouldBreak = false;
+
+        static glm::vec3 camPos = {0.0f, 0.5f, 1.0f};
+
         while (!shouldClose)
         {
-             *model = glm::rotate(*model, glm::radians(1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-            /*
-            static float m_x = -1.0f;
-            static float m_y = 0.5f;
-            static float m_z = 1.0f;
+             *model = glm::rotate(*model, glm::radians(10.0f), glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f)));
+            camPos = glm::rotate(camPos, glm::radians(1.0f), glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)));
 
-            float time = glfwGetTime();
-            m_x = sin(time) / 2.0f;
-            m_z = cos(time) / 2.0f;
-
-            m_camera->setDirection({m_x, m_y, m_z}, { 0.0f, 0.0f, 0.0f });
-            */
+;
+            m_camera->setDirection(camPos, { 0.0f, 0.0f, 0.0f });
             for (auto& l : layouts)
             {
                 if (!shouldClose)

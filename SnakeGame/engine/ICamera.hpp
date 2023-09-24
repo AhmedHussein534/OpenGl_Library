@@ -43,9 +43,6 @@ class ICamera
                                        m_target,
                                        m_up);
 
-            //glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_Position);
-            //m_ViewMatrix = glm::inverse(transform);
-            std::cout << glm::to_string(m_ViewMatrix) << std::endl;
             m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
         }
 
