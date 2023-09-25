@@ -70,6 +70,8 @@ public:
 		return m_model;
 	}
 
+	virtual ~IElement() = default;
+
 protected:
 	std::shared_ptr<glm::mat4> m_model;
 };
