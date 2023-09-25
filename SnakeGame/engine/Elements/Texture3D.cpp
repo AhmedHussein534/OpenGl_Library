@@ -47,8 +47,6 @@ Texture3D::Texture3D(uint8_t* localBuffer, int32_t width, int32_t height, int32_
                                                                                                                 m_y(y),
                                                                                                                 m_z(z),
                                                                                                                 m_center(x+length/2.0f,y-length/2.0f,z-length/2.0f),
-                                                                                                                vertexBuffer(nullptr),
-                                                                                                                indexBuffer(nullptr),
                                                                                                                 shader(std::make_unique<Shader>(vertexShader, fragmentShader))
 {
 	GLCall(glGenTextures(1, &m_rendererId));
@@ -323,8 +321,8 @@ Texture3D::Texture3D(uint8_t* localBuffer, int32_t width, int32_t height, int32_
     indexData->push_back(33);
     indexData->push_back(34);
     indexData->push_back(35);
-    vertexBuffer = std::make_unique<VertexBuffer>(vertexData);
-    indexBuffer  = std::make_unique<IndexBuffer>(indexData);
+    vertexBuffer = std::make_shared<VertexBuffer>(vertexData);
+    indexBuffer  = std::make_shared<IndexBuffer>(indexData);
     vertexElements.emplace_back(3, ElementDataType::FLOAT, true, 5 * sizeof(float));
     vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 5 * sizeof(float));
 
@@ -337,8 +335,6 @@ glm::vec3 Texture3D::getCenter()
 
 void Texture3D::bind(const glm::mat4 &viewProjection)
 {
-    vertexBuffer->bind();
-    indexBuffer->bind();
     shader->bind();
     shader->setUniformValue("u_Texture", int(0));
     shader->setUniformValue("projectionview", 1, false, const_cast<float*>(glm::value_ptr(viewProjection)));

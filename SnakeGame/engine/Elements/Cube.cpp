@@ -43,8 +43,6 @@ Cube::Cube(float x, float y, float z, float length,
                                                                         m_b(b),
                                                                         m_a(a),
                                                                         m_center(x+length/2.0f,y-length/2.0f,z-length/2.0f),
-                                                                        vertexBuffer(nullptr),
-                                                                        indexBuffer(nullptr),
                                                                         shader(std::make_unique<Shader>(vertexShader, fragmentShader))
 {
     vertexElements.emplace_back(3, ElementDataType::FLOAT, true, 3 * sizeof(float));
@@ -66,17 +64,14 @@ Cube::Cube(float x, float y, float z, float length,
         0, 1, 5, 5, 4, 0, 3, 2, 6, 6, 7, 3
     }));
 
-    vertexBuffer = std::make_unique<VertexBuffer>(vertexPtr),
-    indexBuffer = std::make_unique<IndexBuffer>(indexPtr);
+    vertexBuffer = std::make_shared<VertexBuffer>(vertexPtr),
+    indexBuffer  = std::make_shared<IndexBuffer>(indexPtr);
 
 
 }
 
 void Cube::bind(const glm::mat4 &viewProjection)
 {
-    vertexBuffer->bind();
-    indexBuffer->bind();
-
     shader->bind();
     shader->setUniformValue("projectionview", 1, false, const_cast<float*>(glm::value_ptr(viewProjection)));
     shader->setUniformValue("model", 1, false, const_cast<float*>(glm::value_ptr(*m_model)));
@@ -85,8 +80,6 @@ void Cube::bind(const glm::mat4 &viewProjection)
 
 void Cube::unbind()
 {
-    vertexBuffer->unbind();
-    indexBuffer->unbind();
     shader->unbind();
 }
 

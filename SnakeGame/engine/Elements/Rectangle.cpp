@@ -38,8 +38,6 @@ Rectangle::Rectangle(float x, float y, float length, float width,
                                                                   m_b(b),
                                                                   m_a(a),
                                                                   m_center(x+length/2.0f,y-width/2.0f,0.0f),
-                                                                  vertexBuffer(nullptr),
-                                                                  indexBuffer(nullptr),
                                                                   shader(std::make_unique<Shader>(vertexShader, fragmentShader))
 {
 
@@ -86,16 +84,14 @@ Rectangle::Rectangle(float x, float y, float length, float width,
     indexData->push_back(3);
     indexData->push_back(0);
 
-    vertexBuffer = std::make_unique<VertexBuffer>(vertexData),
-    indexBuffer = std::make_unique<IndexBuffer>(indexData);
+    vertexBuffer = std::make_shared<VertexBuffer>(vertexData),
+    indexBuffer  = std::make_shared<IndexBuffer>(indexData);
 }
 
 
 
 void Rectangle::bind(const glm::mat4 &viewProjection)
 {
-    vertexBuffer->bind();
-    indexBuffer->bind();
     shader->bind();
     shader->setUniformValue("u_Color", m_r, m_g, m_b, m_a);
     shader->setUniformValue("projectionview", 1, false, const_cast<float*>(glm::value_ptr(viewProjection)));
@@ -104,8 +100,6 @@ void Rectangle::bind(const glm::mat4 &viewProjection)
 
 void Rectangle::unbind()
 {
-    vertexBuffer->unbind();
-    indexBuffer->unbind();
     shader->unbind();
 }
 

@@ -1,10 +1,14 @@
 #pragma once
-#include <GL/glew.h>
+
 #include <vector>
 #include <utility>
 #include <glm/glm.hpp>
 #include <memory>
+#include <typeinfo>
+#include <GL/glew.h>
 
+#include "VertexBuffer.hpp"
+#include "IndexBuffer.hpp"
 enum class ElementDataType : uint32_t
 {
 	FLOAT = GL_FLOAT,
@@ -55,6 +59,16 @@ public:
 
 	}
 
+	std::shared_ptr<VertexBuffer> getVertexBuffer()
+	{
+		return vertexBuffer;
+	}
+
+	std::shared_ptr<IndexBuffer> getIndexBuffer()
+	{
+		return indexBuffer;
+	}
+
 	virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f)) = 0;
 
 	virtual void unbind() = 0;
@@ -73,5 +87,7 @@ public:
 	virtual ~IElement() = default;
 
 protected:
+	std::shared_ptr<VertexBuffer> vertexBuffer;
+    std::shared_ptr<IndexBuffer> indexBuffer;
 	std::shared_ptr<glm::mat4> m_model;
 };

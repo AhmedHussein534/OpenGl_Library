@@ -21,7 +21,6 @@ void VertexBuffer::bind()
     {
         isBindedBefore = true;
         GLCall(glBufferData(GL_ARRAY_BUFFER, m_data->size() * sizeof(float), m_data->data(), GL_STATIC_DRAW));
-        m_data = nullptr;
     }
 }
 

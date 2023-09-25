@@ -246,7 +246,7 @@ int main(void)
             {
                 if (!shouldClose)
                 {
-                    l->draw(m_camera);
+                    l->drawBatched(m_camera);
                     window->OnUpdate();
                 }
             }

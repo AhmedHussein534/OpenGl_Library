@@ -41,8 +41,6 @@ Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height,
 																			   m_x(x),
 																			   m_y(y),
 																			   m_center(x+length/2.0f,y-length/2.0f,0.0f),
-																			   vertexBuffer(nullptr),
-																			   indexBuffer(nullptr),
 																			   shader(std::make_unique<Shader>(vertexShader, fragmentShader))
 {
 	GLCall(glGenTextures(1, &m_rendererId));
@@ -82,8 +80,8 @@ Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height,
     indexData->push_back(2);
     indexData->push_back(3);
     indexData->push_back(0);
-    vertexBuffer = std::make_unique<VertexBuffer>(vertexData);
-    indexBuffer  = std::make_unique<IndexBuffer>(indexData);
+    vertexBuffer = std::make_shared<VertexBuffer>(vertexData);
+    indexBuffer  = std::make_shared<IndexBuffer>(indexData);
     vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 4 * sizeof(float));
     vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 4 * sizeof(float));
 
@@ -91,8 +89,6 @@ Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height,
 
 void Texture::bind(const glm::mat4 &viewProjection)
 {
-    vertexBuffer->bind();
-    indexBuffer->bind();
     shader->bind();
     shader->setUniformValue("u_Texture", int(0));
     GLCall(glActiveTexture(GL_TEXTURE0 + m_activeSlot));
