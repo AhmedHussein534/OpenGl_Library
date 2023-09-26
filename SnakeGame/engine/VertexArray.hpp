@@ -1,17 +1,20 @@
 
 #pragma once
 
-class VertexArray
+namespace GL_ENGINE
 {
-public:
-	VertexArray();
+	class VertexArray
+	{
+	public:
+		VertexArray();
 
-	void bind();
+		void bind();
 
-	void unbind();
+		void unbind();
 
-	~VertexArray();
+		~VertexArray();
 
-private:
-	unsigned int renderId;
-};
+	private:
+		unsigned int renderId;
+	};
+}

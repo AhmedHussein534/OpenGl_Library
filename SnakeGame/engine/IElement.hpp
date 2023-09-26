@@ -13,91 +13,94 @@
 #include "IndexBuffer.hpp"
 #include "Shader.hpp"
 
-enum class ElementDataType : uint32_t
+namespace GL_ENGINE
 {
-	FLOAT = GL_FLOAT,
-};
-
-struct VertexElement
-{
-	uint32_t count;
-	ElementDataType dataType;
-	bool normalized;
-	uint32_t stride;
-
-	VertexElement(uint32_t m_count, ElementDataType m_dataType, bool m_normalized, uint32_t m_stride) : count(m_count),
-																										dataType(m_dataType),
-																									    normalized(m_normalized),
-																									    stride(m_stride)
+    enum class ElementDataType : uint32_t
 	{
+		FLOAT = GL_FLOAT,
+	};
 
-	}
-
-	size_t getDataSize() const
+	struct VertexElement
 	{
-		switch (dataType)
+		uint32_t count;
+		ElementDataType dataType;
+		bool normalized;
+		uint32_t stride;
+
+		VertexElement(uint32_t m_count, ElementDataType m_dataType, bool m_normalized, uint32_t m_stride) : count(m_count),
+																											dataType(m_dataType),
+																											normalized(m_normalized),
+																											stride(m_stride)
 		{
-			case ElementDataType::FLOAT:
-				return sizeof(float);
-			default:
-				return 0;
+
 		}
-	}
 
-	uint32_t getGlDataType() const
+		size_t getDataSize() const
+		{
+			switch (dataType)
+			{
+				case ElementDataType::FLOAT:
+					return sizeof(float);
+				default:
+					return 0;
+			}
+		}
+
+		uint32_t getGlDataType() const
+		{
+			return static_cast<std::underlying_type_t<ElementDataType>>(dataType);
+		}
+	};
+
+	class IElement
 	{
-		return static_cast<std::underlying_type_t<ElementDataType>>(dataType);
-	}
-};
+	public:
+		IElement() : m_model(std::make_shared<glm::mat4>(1.0f))
+		{
 
-class IElement
-{
-public:
-	IElement() : m_model(std::make_shared<glm::mat4>(1.0f))
-	{
+		}
 
-	}
+		IElement(std::shared_ptr<glm::mat4> model) : m_model(model)
+		{
 
-	IElement(std::shared_ptr<glm::mat4> model) : m_model(model)
-	{
+		}
 
-	}
+		std::shared_ptr<VertexBuffer> getVertexBuffer()
+		{
+			return vertexBuffer;
+		}
 
-	std::shared_ptr<VertexBuffer> getVertexBuffer()
-	{
-		return vertexBuffer;
-	}
+		std::shared_ptr<IndexBuffer> getIndexBuffer()
+		{
+			return indexBuffer;
+		}
 
-	std::shared_ptr<IndexBuffer> getIndexBuffer()
-	{
-		return indexBuffer;
-	}
+		std::shared_ptr<glm::mat4> getModel()
+		{
+			return m_model;
+		}
 
-	std::shared_ptr<glm::mat4> getModel()
-	{
-		return m_model;
-	}
+		std::shared_ptr<Shader> getShader()
+		{
+			return shader;
+		}
 
-	std::shared_ptr<Shader> getShader()
-	{
-		return shader;
-	}
+		virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f), const glm::mat4 &model = glm::mat4(1.0f)) = 0;
 
-	virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f), const glm::mat4 &model = glm::mat4(1.0f)) = 0;
+		virtual void unbind() = 0;
 
-	virtual void unbind() = 0;
+		virtual const std::vector<VertexElement>& getVertexElements() = 0;
 
-	virtual const std::vector<VertexElement>& getVertexElements() = 0;
+		virtual unsigned int getIndicesCount() = 0;
 
-	virtual unsigned int getIndicesCount() = 0;
+		virtual glm::vec3 getCenter() = 0;
 
-	virtual glm::vec3 getCenter() = 0;
+		virtual ~IElement() = default;
 
-	virtual ~IElement() = default;
-
-protected:
-	std::shared_ptr<VertexBuffer> vertexBuffer;
-    std::shared_ptr<IndexBuffer> indexBuffer;
-	std::shared_ptr<glm::mat4> m_model;
-	std::shared_ptr<Shader> shader;
-};
+	protected:
+		std::shared_ptr<VertexBuffer> vertexBuffer;
+		std::shared_ptr<IndexBuffer> indexBuffer;
+		std::shared_ptr<glm::mat4> m_model;
+		std::shared_ptr<Shader> shader;
+	};
+}

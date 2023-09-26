@@ -6,36 +6,39 @@
 #include <iostream>
 #include <unordered_map>
 
-namespace SetUniformDetailed
+namespace GL_ENGINE
 {
-	template <class ...Types>
-	void setUniformValue(int location, Types... values);
-};
-
-class Shader
-{
-public:
-	Shader(const std::string &vertexShader, const std::string &fragmentShader);
-
-	void bind();
-
-	void unbind();
-
-	template <class ...Types>
-	void setUniformValue(const std::string& name, Types... values)
+	namespace SetUniformDetailed
 	{
-		SetUniformDetailed::setUniformValue(getUniformLocation(name), values...);
-	}
+		template <class ...Types>
+		void setUniformValue(int location, Types... values);
+	};
 
-	int getUniformLocation(const std::string &uniformName);
+	class Shader
+	{
+	public:
+		Shader(const std::string &vertexShader, const std::string &fragmentShader);
 
-	~Shader();
+		void bind();
 
-private:
-	unsigned int compileShader(unsigned int type, const std::string& source);
-	unsigned int program;
-	std::string m_vertexShader;
-	std::string m_fragmentShader;
-	std::unordered_map<std::string, int> locationCache;
+		void unbind();
 
-};
+		template <class ...Types>
+		void setUniformValue(const std::string& name, Types... values)
+		{
+			SetUniformDetailed::setUniformValue(getUniformLocation(name), values...);
+		}
+
+		int getUniformLocation(const std::string &uniformName);
+
+		~Shader();
+
+	private:
+		unsigned int compileShader(unsigned int type, const std::string& source);
+		unsigned int program;
+		std::string m_vertexShader;
+		std::string m_fragmentShader;
+		std::unordered_map<std::string, int> locationCache;
+
+	};
+}

@@ -11,107 +11,109 @@
 #include "IElement.hpp"
 #include "ICamera.hpp"
 
-
-struct BatchData
+namespace GL_ENGINE
 {
-	std::shared_ptr<VertexBuffer> batchVertexBuffer;
-	std::shared_ptr<IndexBuffer> batchIndexBuffer;
-	std::shared_ptr<glm::mat4> batchVertexModel;
-	std::shared_ptr<IElement> element;
-
-	BatchData(std::shared_ptr<VertexBuffer> m_batchVertexBuffer,
-			  std::shared_ptr<IndexBuffer> m_batchIndexBuffer,
-			  std::shared_ptr<glm::mat4> m_batchVertexModel,
-			  std::shared_ptr<IElement> m_element) : batchVertexBuffer(m_batchVertexBuffer),
-													 batchIndexBuffer(m_batchIndexBuffer),
-													 batchVertexModel(m_batchVertexModel),
-													 element(m_element)
+	struct BatchData
 	{
+		std::shared_ptr<VertexBuffer> batchVertexBuffer;
+		std::shared_ptr<IndexBuffer> batchIndexBuffer;
+		std::shared_ptr<glm::mat4> batchVertexModel;
+		std::shared_ptr<IElement> element;
 
-	}
-
-};
-
-struct BatchDataContainer
-{
-	std::vector<std::shared_ptr<BatchData>> batchVec;
-
-	bool isModelInContainer(std::shared_ptr<glm::mat4> batchVertexModel, std::shared_ptr<BatchData> &batchData)
-	{
-		bool ret = false;
-		for (auto& b : batchVec)
+		BatchData(std::shared_ptr<VertexBuffer> m_batchVertexBuffer,
+				std::shared_ptr<IndexBuffer> m_batchIndexBuffer,
+				std::shared_ptr<glm::mat4> m_batchVertexModel,
+				std::shared_ptr<IElement> m_element) : batchVertexBuffer(m_batchVertexBuffer),
+														batchIndexBuffer(m_batchIndexBuffer),
+														batchVertexModel(m_batchVertexModel),
+														element(m_element)
 		{
-			auto &model1 = *(b->batchVertexModel);
-			auto &model2 = *batchVertexModel;
-			if (model1 ==  model2)
+
+		}
+
+	};
+
+	struct BatchDataContainer
+	{
+		std::vector<std::shared_ptr<BatchData>> batchVec;
+
+		bool isModelInContainer(std::shared_ptr<glm::mat4> batchVertexModel, std::shared_ptr<BatchData> &batchData)
+		{
+			bool ret = false;
+			for (auto& b : batchVec)
 			{
-				batchData = b;
-				std::cout << "Found similarity" << std::endl;
-				ret = true;
+				auto &model1 = *(b->batchVertexModel);
+				auto &model2 = *batchVertexModel;
+				if (model1 ==  model2)
+				{
+					batchData = b;
+					std::cout << "Found similarity" << std::endl;
+					ret = true;
+				}
+
 			}
 
+			return ret;
 		}
 
-		return ret;
-	}
+		void addElementData(std::shared_ptr<IElement> element)
+		{
+			std::shared_ptr<BatchData> existingData;
+			if (isModelInContainer(element->getModel(), existingData))
+			{
+				*existingData->batchVertexBuffer + *element->getVertexBuffer();
+				*existingData->batchIndexBuffer + *element->getIndexBuffer();
+			}
+			else
+			{
+				auto v = std::make_shared<VertexBuffer>(*element->getVertexBuffer());
+				auto i = std::make_shared<IndexBuffer>(*element->getIndexBuffer());
+				auto m = std::make_shared<glm::mat4>(*(element->getModel()));
+				* m = *(element->getModel());
+				auto d = std::make_shared<BatchData>(v,
+													i,
+													m,
+													element);
+				batchVec.push_back(d);
+			}
+		}
+	};
 
-	void addElementData(std::shared_ptr<IElement> element)
+	class Layout
 	{
-		std::shared_ptr<BatchData> existingData;
-		if (isModelInContainer(element->getModel(), existingData))
-		{
-			*existingData->batchVertexBuffer + *element->getVertexBuffer();
-			*existingData->batchIndexBuffer + *element->getIndexBuffer();
-		}
-		else
-		{
-			auto v = std::make_shared<VertexBuffer>(*element->getVertexBuffer());
-			auto i = std::make_shared<IndexBuffer>(*element->getIndexBuffer());
-			auto m = std::make_shared<glm::mat4>(*(element->getModel()));
-			* m = *(element->getModel());
-			auto d = std::make_shared<BatchData>(v,
-												 i,
-												 m,
-												 element);
-			batchVec.push_back(d);
-		}
-	}
-};
+	public:
+		Layout();
 
-class Layout
-{
-public:
-	Layout();
+		void bind();
 
-	void bind();
+		void unbind();
 
-	void unbind();
-
-	template <typename T>
-	void addElement(std::shared_ptr<T> e)
-	{
-		auto key = std::type_index(typeid(T));
-		if (elementMap.find(key) != elementMap.end())
+		template <typename T>
+		void addElement(std::shared_ptr<T> e)
 		{
-			elementMap[key].push_back(e);
-		}
-		else
-		{
-			elementMap[key] = std::vector<std::shared_ptr<IElement>>({e});
+			auto key = std::type_index(typeid(T));
+			if (elementMap.find(key) != elementMap.end())
+			{
+				elementMap[key].push_back(e);
+			}
+			else
+			{
+				elementMap[key] = std::vector<std::shared_ptr<IElement>>({e});
+			}
+
+			batchCached = false;
 		}
 
-		batchCached = false;
-	}
+		~Layout();
 
-	~Layout();
+		void draw(std::shared_ptr<ICamera> camera);
 
-	void draw(std::shared_ptr<ICamera> camera);
+		void drawBatched(std::shared_ptr<ICamera> camera);
 
-	void drawBatched(std::shared_ptr<ICamera> camera);
-
-private:
-	bool batchCached;
-	std::unordered_map<std::type_index, std::vector<std::shared_ptr<IElement>>> elementMap;
-	std::vector<BatchDataContainer> batchDataContainers;
-	VertexArray vArray;
-};
+	private:
+		bool batchCached;
+		std::unordered_map<std::type_index, std::vector<std::shared_ptr<IElement>>> elementMap;
+		std::vector<BatchDataContainer> batchDataContainers;
+		VertexArray vArray;
+	};
+}

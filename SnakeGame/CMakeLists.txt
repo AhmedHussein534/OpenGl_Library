@@ -34,6 +34,7 @@ add_executable (SnakeGame
 				"engine/Shader.cpp"
 				"engine/Layout.cpp"
 				"engine/Elements/Square.cpp"
+				"engine/Elements/Rectangle.cpp"
 				"engine/Elements/Texture.cpp"
 				"engine/Elements/Texture3D.cpp"
 				"engine/Elements/Cube.cpp"

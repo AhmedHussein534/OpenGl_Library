@@ -3,20 +3,23 @@
 #include <GL/glew.h>
 #include <iostream>
 
-void GLClearError()
+namespace GL_ENGINE
 {
-	while (glGetError() != GL_NO_ERROR);
-}
-
-bool GLLogCall(const char* function, const char* file, int line)
-{
-	bool ret = true;
-	while (GLenum error = glGetError())
+	void GLClearError()
 	{
-		std::cout << "[OPENGL Error] (" << error << "): " << function
-			<< " " << file << ":" << line << std::endl;
-		ret = false;
+		while (glGetError() != GL_NO_ERROR);
 	}
 
-	return ret;
+	bool GLLogCall(const char* function, const char* file, int line)
+	{
+		bool ret = true;
+		while (GLenum error = glGetError())
+		{
+			std::cout << "[OPENGL Error] (" << error << "): " << function
+				<< " " << file << ":" << line << std::endl;
+			ret = false;
+		}
+
+		return ret;
+	}
 }

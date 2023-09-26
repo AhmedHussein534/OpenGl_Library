@@ -9,9 +9,11 @@
 #include <bits/stdc++.h>
 #include <random>
 #include <vector>
+#include <array>
 
 #include "engine/Layout.hpp"
 #include "engine/Elements/Square.hpp"
+#include "engine/Elements/Rectangle.hpp"
 #include "engine/Cameras/OrthographicCamera.hpp"
 #include "engine/Timestep.hpp"
 #include "events/EventDispatcher.hpp"
@@ -23,9 +25,10 @@
 #define SWAP_INTERVAL 1
 
 
-using WormPiece = Square;
+using WormPiece = GL_ENGINE::Square;
 using WormPiecePtr = std::shared_ptr<WormPiece>;
 using Worm = std::list<std::shared_ptr<WormPiece>>;
+using border = GL_ENGINE::Rectangle;
 
 enum class MOVE_DIRECTION : uint32_t
 {
@@ -38,33 +41,72 @@ enum class MOVE_DIRECTION : uint32_t
 
 bool shouldClose = false;
 const float coordinateSize = 1000.0f;
+const float halfCoordinate = coordinateSize / 2.0f;
 const uint32_t wormLen = 4;
-const float wormPieceSize = 0.04 *  coordinateSize;// always make sure this is divisible by 2
+const float wormPieceSize = 0.02f *  coordinateSize;// always make sure this is divisible by 2
 const float wormPieceVisible = wormPieceSize * 0.8f;
 const float startYPos = wormPieceSize / 2.0f;
-const float fps = 30;
+float fps = 6;
 MOVE_DIRECTION moveDirection = MOVE_DIRECTION::UP;
+MOVE_DIRECTION lastMoveDirection = MOVE_DIRECTION::UP;
+float aspectRatio = 0.0f;
+constexpr size_t borderCount = 4;
 
-
-template <typename T>
-bool isTwoPiecesCollided(std::shared_ptr<T> p1, std::shared_ptr<T> p2);
-
-
-template<>
-bool isTwoPiecesCollided(std::shared_ptr<Square> p1, std::shared_ptr<Square> p2)
+bool initBorders(std::shared_ptr<GL_ENGINE::Layout> layout, std::array<std::shared_ptr<border>, borderCount> borders)
 {
+    std::array<float, borderCount> xCoordinates = {-halfCoordinate                , -halfCoordinate , -halfCoordinate,  halfCoordinate - wormPieceVisible};
+    std::array<float, borderCount> yCoordinates = {wormPieceVisible - halfCoordinate,  halfCoordinate,   halfCoordinate,  halfCoordinate};
+    std::array<float, borderCount> length = {coordinateSize, wormPieceVisible, coordinateSize, wormPieceVisible};
+    std::array<float, borderCount> width = {wormPieceVisible,  coordinateSize, wormPieceVisible, coordinateSize};
+    size_t currentBorder = 0;
+    for (auto &it : borders)
+    {
+        it = std::make_shared<border>(xCoordinates[currentBorder], yCoordinates[currentBorder], length[currentBorder], width[currentBorder]);
+        layout->addElement(it);
+        currentBorder++;
+    }
+}
+
+bool isTwoPiecesCollided(const std::shared_ptr<WormPiece> p1, const std::shared_ptr<WormPiece> p2)
+{
+    bool ret = false;
     if ((p1 == nullptr) || (p2 == nullptr))
     {
-        return false;
+        ret = false;
+    }
+    else
+    {
+        auto p1Center = p1->getCenter();
+        auto p2Center = p2->getCenter();
+        int p1_0 = static_cast<int>(p1Center[0]);
+        int p2_0 = static_cast<int>(p2Center[0]);
+        int p1_1 = static_cast<int>(p1Center[1]);
+        int p2_1 = static_cast<int>(p2Center[1]);
+        ret =  ((p1_0 == p2_0) && (p1_1 == p2_1));
     }
 
-    auto p1Center = p1->getCenter();
-    auto p2Center = p2->getCenter();
-    int p1_0 = static_cast<int>(p1Center[0]);
-    int p2_0 = static_cast<int>(p2Center[0]);
-    int p1_1 = static_cast<int>(p1Center[1]);
-    int p2_1 = static_cast<int>(p2Center[1]);
-    return ((p1_0 == p2_0) && (p1_1 == p2_1));
+    return ret;
+}
+
+bool isPieceOutside(const std::shared_ptr<GL_ENGINE::Square> piece)
+{
+    bool ret = false;
+    if ((piece == nullptr))
+    {
+        ret = false;
+    }
+    else
+    {
+        auto squareCenter = piece->getCenter();
+        int squareX = static_cast<int>(squareCenter[0]);
+        int squareY = static_cast<int>(squareCenter[1]);
+        ret = (squareX > static_cast<int>(halfCoordinate - wormPieceSize)) ||
+              (squareX < static_cast<int>(-halfCoordinate + wormPieceSize)) ||
+              (squareY < static_cast<int>(-halfCoordinate + wormPieceSize)) ||
+              (squareY > static_cast<int>(halfCoordinate - wormPieceSize));
+    }
+
+    return ret;
 }
 
 
@@ -116,27 +158,27 @@ bool onKeyReleased(const KeyReleasedEvent &e)
     switch (e.GetKeyCode())
     {
         case Key::Up:
-            if (moveDirection != MOVE_DIRECTION::DOWN)
+            if (lastMoveDirection != MOVE_DIRECTION::DOWN)
             {
                 moveDirection = MOVE_DIRECTION::UP;
             }
 
             break;
         case Key::Down:
-            if (moveDirection != MOVE_DIRECTION::UP)
+            if (lastMoveDirection != MOVE_DIRECTION::UP)
             {
                 moveDirection = MOVE_DIRECTION::DOWN;
             }
 
             break;
         case Key::Right:
-            if (moveDirection != MOVE_DIRECTION::LEFT)
+            if (lastMoveDirection != MOVE_DIRECTION::LEFT)
             {
                 moveDirection = MOVE_DIRECTION::RIGHT;
             }
             break;
         case Key::Left:
-            if (moveDirection != MOVE_DIRECTION::RIGHT)
+            if (lastMoveDirection != MOVE_DIRECTION::RIGHT)
             {
                 moveDirection = MOVE_DIRECTION::LEFT;
             }
@@ -152,19 +194,17 @@ bool onKeyReleased(const KeyReleasedEvent &e)
 
 void onEvent(Event& e)
 {
-    std::cout << e.GetName() << std::endl;
     EventDispatcher::getInstance().Dispatch<KeyReleasedEvent>(e, onKeyReleased);
     EventDispatcher::getInstance().Dispatch<WindowCloseEvent>(e, onCloseTriggered);
-
 }
 
 
-void initWorm(Worm &worm,  std::shared_ptr<Layout> layout)
+void initWorm(Worm &worm,  std::shared_ptr<GL_ENGINE::Layout> layout)
 {
     float currentXPiecePos = 0.0f - (wormPieceSize / 2.0f);
     for (uint32_t i = 0; i < wormLen; i++)
     {
-        auto piece = std::make_shared<Square>(currentXPiecePos, startYPos, wormPieceVisible); //only draw 80% of each size to leave gap
+        auto piece = std::make_shared<GL_ENGINE::Square>(currentXPiecePos, startYPos, wormPieceVisible); //only draw 80% of each size to leave gap
         worm.push_back(piece);
         layout->addElement(piece);
         currentXPiecePos += wormPieceSize;
@@ -172,73 +212,104 @@ void initWorm(Worm &worm,  std::shared_ptr<Layout> layout)
 
 }
 
+void moveWormPieceInDirection(std::shared_ptr<WormPiece> piece, float step = wormPieceSize, MOVE_DIRECTION direction = MOVE_DIRECTION::UP)
+{
+    auto pieceModel = piece->getModel();
+    auto dirUnitVector = getDirectionUnitVector(direction);
+    *pieceModel = glm::translate(*pieceModel, dirUnitVector * step);
+}
+
+void moveWormPieceToOther(std::shared_ptr<WormPiece> pieceToMove, std::shared_ptr<WormPiece> otherPiece, float step = wormPieceSize)
+{
+    auto pieceModel = pieceToMove->getModel();
+    auto center = pieceToMove->getCenter();
+    glm::vec3 nextPieceCenter = otherPiece->getCenter();
+    *pieceModel = glm::translate(*pieceModel, glm::normalize(nextPieceCenter - center) * step);
+}
+
 void moveWorm(Worm &worm, float step = wormPieceSize, MOVE_DIRECTION direction = MOVE_DIRECTION::UP)
 {
     auto it = worm.begin();
     while (it != worm.end())
     {
-        auto pieceModel = (*it)->getModel();
-        auto center = (*it)->getCenter();
+        std::shared_ptr<WormPiece> pieceToMove = *it;
         it++;
         if (it != worm.end())
         {
-            glm::vec3 nextPieceCenter = (*it)->getCenter();
-            *pieceModel = glm::translate(*pieceModel, glm::normalize(nextPieceCenter - center) * step);
+            moveWormPieceToOther(pieceToMove, *it);
         }
         else
         {
-            // HEAD
-            auto dirUnitVector = getDirectionUnitVector(direction);
-            *pieceModel = glm::translate(*pieceModel, dirUnitVector * step);
+            moveWormPieceInDirection(pieceToMove, step, direction);
         }
     }
 
 }
 
-std::shared_ptr<WormPiece> createRandomFood(std::shared_ptr<Layout> layout)
+std::shared_ptr<WormPiece> createRandomFood(std::shared_ptr<GL_ENGINE::Layout> layout)
 {
     float align = wormPieceSize;
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine gen(seed);
-    std::uniform_real_distribution<float> distribution(-coordinateSize, coordinateSize);
+    std::uniform_real_distribution<float> distribution(-halfCoordinate + wormPieceSize, halfCoordinate - wormPieceSize);
     float x = static_cast<float>(static_cast<int>(distribution(gen) / align)) * align;
     float y = static_cast<float>(static_cast<int>(distribution(gen) / align)) * align;
-    auto foodShared = std::make_shared<WormPiece>(x - wormPieceSize / 2.0f, y + wormPieceSize / 2.0f, wormPieceVisible);
+    auto foodShared = std::make_shared<WormPiece>(x - wormPieceSize / 2.0f, y + wormPieceSize / 2.0f, wormPieceVisible, 255.0f, 0.0f, 0.0f);
     layout->addElement(foodShared);
     return foodShared;
 }
 
-int main(void)
+bool isWormSelfCollided(Worm &worm)
 {
-
-    EventDispatcher::getInstance().subscribeToEvents(EventCategoryKeyboard | EventCategoryApplication, onEvent);
-    auto window = init();
-    float aspectRatio = static_cast<float>(window->GetWidth()) / static_cast<float>(window->GetHeight());
-    Timestep time;
-    if (window == nullptr)
+    bool isSelfCollided = false;
+    auto it = worm.rbegin();
+    auto head = it;
+    it++;
+    for (; it != worm.rend(); ++it)
     {
-        return -1;
+        if (isTwoPiecesCollided(*head, *it))
+        {
+            isSelfCollided = true;
+        }
     }
 
-    std::shared_ptr<OrthographicCamera> m_camera = std::make_shared<OrthographicCamera>(-1000.0f * aspectRatio, 1000.0f * aspectRatio, -1000.0f, 1000.0f);
-    std::vector<std::shared_ptr<Layout>> layouts = {};
-    std::shared_ptr<Layout> wormLayout = std::make_shared<Layout>();
+    return isSelfCollided;
+
+}
+
+
+void executeGame(std::shared_ptr<WindowsWindow> window)
+{
+    GL_ENGINE::Timestep time;
+    auto step = wormPieceSize;
+    std::shared_ptr<GL_ENGINE::OrthographicCamera> m_camera = std::make_shared<GL_ENGINE::OrthographicCamera>(-halfCoordinate * aspectRatio, halfCoordinate * aspectRatio, -halfCoordinate, halfCoordinate);
+    std::vector<std::shared_ptr<GL_ENGINE::Layout>> layouts = {};
+    std::shared_ptr<GL_ENGINE::Layout> wormLayout = std::make_shared<GL_ENGINE::Layout>();
     Worm worm = {};
-    initWorm(worm, wormLayout);
+    std::array<std::shared_ptr<border>, borderCount> borders = {};
     std::weak_ptr<WormPiece> food = createRandomFood(wormLayout);
+
     layouts.push_back(wormLayout);
 
+    initWorm(worm, wormLayout);
+    initBorders(wormLayout, borders);
 
     while (!shouldClose)
     {
-        if (time.getDelta<std::milli>(false) >= (1.0f / fps))
+        auto delta = time.getDelta<std::milli>();
+        if (delta >= (1000.0f / fps))
         {
-            time.getDelta<std::milli>();
+            std::cout << delta << std::endl;
+            time.notifyUpdate();
             if (isTwoPiecesCollided(worm.back(), food.lock()))
             {
-                worm.push_front(food.lock());
+                moveWormPieceInDirection(food.lock(), step, moveDirection);
+                worm.push_back(food.lock());
                 food = createRandomFood(wormLayout);
-                moveWorm(worm, wormPieceSize, moveDirection);
+                if (worm.size() % 5 == 0)
+                {
+                    fps = fps * 1.1f;
+                }
             }
 
             for (auto& l : layouts)
@@ -250,15 +321,32 @@ int main(void)
                 }
             }
 
+            lastMoveDirection = moveDirection;
+            moveWorm(worm, step, moveDirection);
+            if (isWormSelfCollided(worm))
+            {
+                break;
+            }
 
-            moveWorm(worm, wormPieceSize, moveDirection);
-
-
+            if (isPieceOutside(worm.back()))
+            {
+                break;
+            }
         }
     }
+}
 
+int main(void)
+{
 
+    EventDispatcher::getInstance().subscribeToEvents(EventCategoryKeyboard | EventCategoryApplication, onEvent);
+    auto window = init();
+    if (window == nullptr)
+    {
+        return -1;
+    }
 
-
+    aspectRatio = static_cast<float>(window->GetWidth()) / static_cast<float>(window->GetHeight());
+    executeGame(window);
     return 0;
 }

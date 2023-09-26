@@ -2,30 +2,32 @@
 
 #include <chrono>
 
-class Timestep
+namespace GL_ENGINE
 {
-    public:
-    Timestep() : isReadBefore(false),
-                 lastReadTime(std::chrono::high_resolution_clock::now())
+    class Timestep
     {
-
-    }
-
-    template<typename T>
-    float getDelta(bool update = true)
-    {
-        auto temp = lastReadTime;
-        auto timeNow = std::chrono::high_resolution_clock::now();
-        if (update)
+        public:
+        Timestep() : lastReadTime(std::chrono::high_resolution_clock::now())
         {
-            lastReadTime = timeNow;
+
         }
 
-        return std::chrono::duration<float, T>(timeNow - temp).count();
-    }
+        template<typename T>
+        float getDelta()
+        {
+            auto temp = lastReadTime;
+            auto timeNow = std::chrono::high_resolution_clock::now();
+            return std::chrono::duration<float, T>(timeNow - temp).count();
+        }
+
+        void notifyUpdate()
+        {
+            lastReadTime = std::chrono::high_resolution_clock::now();
+        }
 
 
-    private:
-        bool isReadBefore;
-        std::chrono::time_point<std::chrono::high_resolution_clock> lastReadTime;
-};
+
+        private:
+            std::chrono::time_point<std::chrono::high_resolution_clock> lastReadTime;
+    };
+}

@@ -5,52 +5,55 @@
 #include <glm/gtx/string_cast.hpp>
 #include <iostream>
 
-class ICamera
+namespace GL_ENGINE
 {
-    public:
-		ICamera() = default;
-		ICamera(const glm::mat4& projection, const glm::mat4& view)
-			: m_ProjectionMatrix(projection), m_ViewMatrix(view), m_ViewProjectionMatrix(m_ProjectionMatrix * m_ViewMatrix)
-        {
+    class ICamera
+    {
+        public:
+            ICamera() = default;
+            ICamera(const glm::mat4& projection, const glm::mat4& view)
+                : m_ProjectionMatrix(projection), m_ViewMatrix(view), m_ViewProjectionMatrix(m_ProjectionMatrix * m_ViewMatrix)
+            {
 
-        }
+            }
 
-		virtual ~ICamera() = default;
+            virtual ~ICamera() = default;
 
-        const glm::vec3& GetPosition() const { return m_Position; }
-        const glm::vec3& GetTarget() const { return m_target; }
-        const glm::vec3& GetUp() const { return m_up; }
-		void setDirection(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up=glm::vec3(0.0f, 1.0f, 0.0f))
-        {
-            m_Position = position;
-            m_target = target;
-            m_up = up;
-            RecalculateViewMatrix();
-        }
+            const glm::vec3& GetPosition() const { return m_Position; }
+            const glm::vec3& GetTarget() const { return m_target; }
+            const glm::vec3& GetUp() const { return m_up; }
+            void setDirection(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up=glm::vec3(0.0f, 1.0f, 0.0f))
+            {
+                m_Position = position;
+                m_target = target;
+                m_up = up;
+                RecalculateViewMatrix();
+            }
 
-		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
+            const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
 
-        const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
+            const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 
-        const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
+            const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
 
 
-	protected:
-        virtual void RecalculateViewMatrix()
-        {
+        protected:
+            virtual void RecalculateViewMatrix()
+            {
 
-            m_ViewMatrix = glm::lookAt(m_Position,
-                                       m_target,
-                                       m_up);
+                m_ViewMatrix = glm::lookAt(m_Position,
+                                        m_target,
+                                        m_up);
 
-            m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
-        }
+                m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
+            }
 
-		glm::mat4 m_ProjectionMatrix;
-		glm::mat4 m_ViewMatrix;
-		glm::mat4 m_ViewProjectionMatrix;
-        glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
-        glm::vec3 m_target = { 0.0f, 0.0f, 0.0f };
-        glm::vec3 m_up = { 0.0f, 1.0f, 0.0f };
+            glm::mat4 m_ProjectionMatrix;
+            glm::mat4 m_ViewMatrix;
+            glm::mat4 m_ViewProjectionMatrix;
+            glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
+            glm::vec3 m_target = { 0.0f, 0.0f, 0.0f };
+            glm::vec3 m_up = { 0.0f, 1.0f, 0.0f };
 
-};
+    };
+}
