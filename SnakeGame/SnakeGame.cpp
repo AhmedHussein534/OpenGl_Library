@@ -42,7 +42,7 @@ const uint32_t wormLen = 4;
 const float wormPieceSize = 0.04 *  coordinateSize;// always make sure this is divisible by 2
 const float wormPieceVisible = wormPieceSize * 0.8f;
 const float startYPos = wormPieceSize / 2.0f;
-const float frameInterval_ms = 100;
+const float fps = 30;
 MOVE_DIRECTION moveDirection = MOVE_DIRECTION::UP;
 
 
@@ -229,10 +229,9 @@ int main(void)
     layouts.push_back(wormLayout);
 
 
-    time.getDelta<std::milli>();
     while (!shouldClose)
     {
-        if (time.getDelta<std::milli>(false) >= frameInterval_ms)
+        if (time.getDelta<std::milli>(false) >= (1.0f / fps))
         {
             time.getDelta<std::milli>();
             if (isTwoPiecesCollided(worm.back(), food.lock()))
@@ -246,7 +245,7 @@ int main(void)
             {
                 if (!shouldClose)
                 {
-                    l->drawBatched(m_camera);
+                    l->draw(m_camera);
                     window->OnUpdate();
                 }
             }

@@ -2,9 +2,7 @@
 #include "Renderer.hpp"
 #include <GL/glew.h>
 #include "external/stb_image/stb_image.hpp"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+
 
 namespace
 {
@@ -46,8 +44,7 @@ Texture3D::Texture3D(uint8_t* localBuffer, int32_t width, int32_t height, int32_
                                                                                                                 m_x(x),
                                                                                                                 m_y(y),
                                                                                                                 m_z(z),
-                                                                                                                m_center(x+length/2.0f,y-length/2.0f,z-length/2.0f),
-                                                                                                                shader(std::make_unique<Shader>(vertexShader, fragmentShader))
+                                                                                                                m_center(x+length/2.0f,y-length/2.0f,z-length/2.0f)
 {
 	GLCall(glGenTextures(1, &m_rendererId));
 	GLCall(glBindTexture(GL_TEXTURE_2D, m_rendererId));
@@ -58,6 +55,8 @@ Texture3D::Texture3D(uint8_t* localBuffer, int32_t width, int32_t height, int32_
 
 	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_localBuffer));
 	GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+
+    shader = std::make_shared<Shader>(vertexShader, fragmentShader);
 
     std::shared_ptr<std::vector<float>> vertexData = std::make_shared<std::vector<float>>();
     std::shared_ptr<std::vector<uint32_t>> indexData = std::make_shared<std::vector<uint32_t>>();
@@ -333,7 +332,7 @@ glm::vec3 Texture3D::getCenter()
     return *m_model * glm::vec4(m_center, 1.0f);
 }
 
-void Texture3D::bind(const glm::mat4 &viewProjection)
+void Texture3D::bind(const glm::mat4 &viewProjection, const glm::mat4 &model)
 {
     shader->bind();
     shader->setUniformValue("u_Texture", int(0));

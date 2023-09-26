@@ -3,12 +3,16 @@
 #include <vector>
 #include <utility>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <memory>
 #include <typeinfo>
 #include <GL/glew.h>
 
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
+#include "Shader.hpp"
+
 enum class ElementDataType : uint32_t
 {
 	FLOAT = GL_FLOAT,
@@ -69,7 +73,17 @@ public:
 		return indexBuffer;
 	}
 
-	virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f)) = 0;
+	std::shared_ptr<glm::mat4> getModel()
+	{
+		return m_model;
+	}
+
+	std::shared_ptr<Shader> getShader()
+	{
+		return shader;
+	}
+
+	virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f), const glm::mat4 &model = glm::mat4(1.0f)) = 0;
 
 	virtual void unbind() = 0;
 
@@ -79,15 +93,11 @@ public:
 
 	virtual glm::vec3 getCenter() = 0;
 
-	std::shared_ptr<glm::mat4> getModel()
-	{
-		return m_model;
-	}
-
 	virtual ~IElement() = default;
 
 protected:
 	std::shared_ptr<VertexBuffer> vertexBuffer;
     std::shared_ptr<IndexBuffer> indexBuffer;
 	std::shared_ptr<glm::mat4> m_model;
+	std::shared_ptr<Shader> shader;
 };

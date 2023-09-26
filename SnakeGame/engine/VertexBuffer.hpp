@@ -10,26 +10,11 @@ class VertexBuffer
 public:
 	VertexBuffer(std::shared_ptr<std::vector<float>> dataPtr);
 
-	VertexBuffer(VertexBuffer &other)
-	{
-		renderId = other.renderId;
-		isBindedBefore = false;
-		m_data = std::make_shared<std::vector<float>>(*(other.m_data));
-	}
+	VertexBuffer(VertexBuffer &other);
 
-	VertexBuffer(VertexBuffer &&other)
-	{
-		renderId = other.renderId;
-		isBindedBefore = false;
-		m_data = other.m_data;
-	}
+	VertexBuffer(VertexBuffer &&other);
 
-	VertexBuffer& operator+(VertexBuffer &other)
-	{
-		m_data->insert(m_data->end(), other.m_data->begin(), other.m_data->end());
-		std::cout << "Vertex Buffer size: " << m_data->size() << std::endl;
-		return *this;
-	}
+	VertexBuffer& operator+(const VertexBuffer &other);
 
 	void bind();
 

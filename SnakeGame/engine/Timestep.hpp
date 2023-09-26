@@ -5,7 +5,8 @@
 class Timestep
 {
     public:
-    Timestep() : isReadBefore(false)
+    Timestep() : isReadBefore(false),
+                 lastReadTime(std::chrono::high_resolution_clock::now())
     {
 
     }
@@ -13,27 +14,14 @@ class Timestep
     template<typename T>
     float getDelta(bool update = true)
     {
-        if (!isReadBefore)
+        auto temp = lastReadTime;
+        auto timeNow = std::chrono::high_resolution_clock::now();
+        if (update)
         {
-            if (update)
-            {
-                lastReadTime = std::chrono::high_resolution_clock::now();
-                isReadBefore = true;
-            }
-
-            return 0.0f;
+            lastReadTime = timeNow;
         }
-        else
-        {
-            auto temp = lastReadTime;
-            auto timeNow = std::chrono::high_resolution_clock::now();
-            if (update)
-            {
-                lastReadTime = timeNow;
-            }
 
-            return std::chrono::duration<float, T>(timeNow - temp).count();
-        }
+        return std::chrono::duration<float, T>(timeNow - temp).count();
     }
 
 

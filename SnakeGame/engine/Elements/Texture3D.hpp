@@ -16,7 +16,7 @@ public:
 	Texture3D(uint8_t* localBuffer, int32_t width, int32_t height, int32_t BPP, uint32_t slot,
 		    float x, float y, float z, float length, float rotate, float rotateAxisX, float rotateAxisY);
 
-	void bind(const glm::mat4 &viewProjection) override;
+	void bind(const glm::mat4 &viewProjection, const glm::mat4 &model) override;
 
 	void unbind() override;
 
@@ -41,7 +41,6 @@ private:
     float m_z;
 	float m_length;
 	glm::vec3 m_center;
-	std::unique_ptr<Shader> shader;
 	std::vector<VertexElement> vertexElements;
 };
 

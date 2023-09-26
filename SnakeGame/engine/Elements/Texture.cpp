@@ -40,8 +40,7 @@ Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height,
 																			   m_activeSlot(slot),
 																			   m_x(x),
 																			   m_y(y),
-																			   m_center(x+length/2.0f,y-length/2.0f,0.0f),
-																			   shader(std::make_unique<Shader>(vertexShader, fragmentShader))
+																			   m_center(x+length/2.0f,y-length/2.0f,0.0f)
 {
 	GLCall(glGenTextures(1, &m_rendererId));
 	GLCall(glBindTexture(GL_TEXTURE_2D, m_rendererId));
@@ -53,6 +52,7 @@ Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height,
 	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_localBuffer));
 	GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 
+	shader = std::make_shared<Shader>(vertexShader, fragmentShader);
     std::shared_ptr<std::vector<float>> vertexData = std::make_shared<std::vector<float>>();
     std::shared_ptr<std::vector<uint32_t>> indexData = std::make_shared<std::vector<uint32_t>>();
 
@@ -87,10 +87,11 @@ Texture::Texture(uint8_t* localBuffer, int32_t width, int32_t height,
 
 }
 
-void Texture::bind(const glm::mat4 &viewProjection)
+void Texture::bind(const glm::mat4 &viewProjection, const glm::mat4 &model)
 {
     shader->bind();
     shader->setUniformValue("u_Texture", int(0));
+	shader->setUniformValue("model", 1, false, const_cast<float*>(glm::value_ptr(*m_model)));
     GLCall(glActiveTexture(GL_TEXTURE0 + m_activeSlot));
     GLCall(glBindTexture(GL_TEXTURE_2D, m_rendererId));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -123,8 +124,6 @@ Texture::~Texture()
 {
 	GLCall(glDeleteTextures(1, &m_rendererId));
 }
-
-
 
 
 

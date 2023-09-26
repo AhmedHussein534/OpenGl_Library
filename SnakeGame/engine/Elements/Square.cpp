@@ -39,9 +39,9 @@ Square::Square(float x, float y, float length,
                                                                   m_g(g),
                                                                   m_b(b),
                                                                   m_a(a),
-                                                                  m_center(x+length/2.0f,y-length/2.0f,0.0f),
-                                                                  shader(std::make_unique<Shader>(vertexShader, fragmentShader))
+                                                                  m_center(x+length/2.0f,y-length/2.0f,0.0f)
 {
+    shader = std::make_shared<Shader>(vertexShader, fragmentShader);
     std::shared_ptr<std::vector<float>> vertexData = std::make_shared<std::vector<float>>();
     std::shared_ptr<std::vector<uint32_t>> indexData = std::make_shared<std::vector<uint32_t>>();
 
@@ -69,7 +69,7 @@ Square::Square(float x, float y, float length,
 
 
 
-void Square::bind(const glm::mat4 &viewProjection)
+void Square::bind(const glm::mat4 &viewProjection, const glm::mat4 &model)
 {
     shader->bind();
     shader->setUniformValue("u_Color", m_r, m_g, m_b, m_a);

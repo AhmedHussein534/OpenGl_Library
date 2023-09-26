@@ -17,7 +17,7 @@ public:
 	Texture(uint8_t* localBuffer, int32_t width, int32_t height,
 	        int32_t BPP, uint32_t slot, float x, float y, float length);
 
-	void bind(const glm::mat4 &viewProjection) override;
+	void bind(const glm::mat4 &viewProjection, const glm::mat4 &model) override;
 
 	void unbind() override;
 
@@ -30,7 +30,6 @@ public:
 	~Texture();
 
 private:
-
 	uint32_t m_rendererId;
 	uint8_t* m_localBuffer;
 	int m_width;
@@ -41,7 +40,6 @@ private:
 	float m_y;
 	float m_length;
 	glm::vec3 m_center;
-	std::unique_ptr<Shader> shader;
 	std::vector<VertexElement> vertexElements;
 };
 
