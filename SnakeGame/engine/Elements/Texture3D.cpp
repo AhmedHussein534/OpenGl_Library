@@ -58,268 +58,60 @@ Texture3D::Texture3D(uint8_t* localBuffer, int32_t width, int32_t height, int32_
 
     shader = std::make_shared<Shader>(vertexShader, fragmentShader);
 
-    std::shared_ptr<std::vector<float>> vertexData = std::make_shared<std::vector<float>>();
-    std::shared_ptr<std::vector<uint32_t>> indexData = std::make_shared<std::vector<uint32_t>>();
 
-
-
-    vertexData->push_back(x);
-    vertexData->push_back(y);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y);
-    vertexData->push_back(z);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y);
-    vertexData->push_back(z);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y);
-    vertexData->push_back(z);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y);
-    vertexData->push_back(z);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y);
-    vertexData->push_back(z);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y);
-    vertexData->push_back(z);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y);
-    vertexData->push_back(z);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y);
-    vertexData->push_back(z);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y);
-    vertexData->push_back(z);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y);
-    vertexData->push_back(z);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(0.0f);
-
-
-    vertexData->push_back(x);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z - m_length);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(1.0f);
-
-    vertexData->push_back(x + m_length);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z);
-    vertexData->push_back(1.0f);
-    vertexData->push_back(0.0f);
-
-    vertexData->push_back(x);
-    vertexData->push_back(y - m_length);
-    vertexData->push_back(z);
-    vertexData->push_back(0.0f);
-    vertexData->push_back(0.0f);
+    std::shared_ptr<std::vector<float>> vertexData = std::make_shared<std::vector<float>>(
+                                                    std::initializer_list<float>({
+                                                    (x)           ,     (y)           ,     (z - m_length),     (0.0f),     (1.0f),
+                                                    (x + m_length),     (y)           ,     (z - m_length),     (1.0f),     (1.0f),
+                                                    (x)           ,     (y - m_length),     (z - m_length),     (0.0f),     (0.0f),
+                                                    (x)           ,     (y - m_length),     (z - m_length),     (0.0f),     (0.0f),
+                                                    (x + m_length),     (y - m_length),     (z - m_length),     (1.0f),     (0.0f),
+                                                    (x + m_length),     (y)           ,     (z - m_length),     (1.0f),     (1.0f),
+                                                    (x)           ,     (y)           ,     (z)           ,     (0.0f),     (1.0f),
+                                                    (x + m_length),     (y)           ,     (z)           ,     (1.0f),     (1.0f),
+                                                    (x)           ,     (y - m_length),     (z)           ,     (0.0f),     (0.0f),
+                                                    (x)           ,     (y - m_length),     (z)           ,     (0.0f),     (0.0f),
+                                                    (x + m_length),     (y - m_length),     (z)           ,     (1.0f),     (0.0f),
+                                                    (x + m_length),     (y)           ,     (z)           ,     (1.0f),     (1.0f),
+                                                    (x)           ,     (y)           ,     (z)           ,     (1.0f),     (1.0f),
+                                                    (x)           ,     (y)           ,     (z - m_length),     (0.0f),     (1.0f),
+                                                    (x)           ,     (y - m_length),     (z - m_length),     (0.0f),     (0.0f),
+                                                    (x)           ,     (y - m_length),     (z - m_length),     (0.0f),     (0.0f),
+                                                    (x)           ,     (y)           ,     (z)           ,     (1.0f),     (1.0f),
+                                                    (x)           ,     (y - m_length),     (z)           ,     (1.0f),     (0.0f),
+                                                    (x + m_length),     (y)           ,     (z)           ,     (0.0f),     (1.0f),
+                                                    (x + m_length),     (y)           ,     (z - m_length),     (1.0f),     (1.0f),
+                                                    (x + m_length),     (y - m_length),     (z - m_length),     (1.0f),     (0.0f),
+                                                    (x + m_length),     (y - m_length),     (z - m_length),     (1.0f),     (0.0f),
+                                                    (x + m_length),     (y)           ,     (z)           ,     (0.0f),     (1.0f),
+                                                    (x + m_length),     (y - m_length),     (z)           ,     (0.0f),     (0.0f),
+                                                    (x)           ,     (y)           ,     (z)           ,     (0.0f),     (0.0f),
+                                                    (x)           ,     (y)           ,     (z - m_length),     (0.0f),     (1.0f),
+                                                    (x + m_length),     (y)           ,     (z - m_length),     (1.0f),     (1.0f),
+                                                    (x + m_length),     (y)           ,     (z - m_length),     (1.0f),     (1.0f),
+                                                    (x + m_length),     (y)           ,     (z)           ,     (1.0f),     (0.0f),
+                                                    (x)           ,     (y)           ,     (z)           ,     (0.0f),     (0.0f),
+                                                    (x)           ,     (y - m_length),     (z)           ,     (0.0f),     (0.0f),
+                                                    (x)           ,     (y - m_length),     (z - m_length),     (0.0f),     (1.0f),
+                                                    (x + m_length),     (y - m_length),     (z - m_length),     (1.0f),     (1.0f),
+                                                    (x + m_length),     (y - m_length),     (z - m_length),     (1.0f),     (1.0f),
+                                                    (x + m_length),     (y - m_length),     (z)           ,     (1.0f),     (0.0f),
+                                                    (x)           ,     (y - m_length),     (z)           ,     (0.0f),     (0.0f)}));
 
 
 
 
-
-    indexData->push_back(0);
-    indexData->push_back(1);
-    indexData->push_back(2);
-    indexData->push_back(3);
-    indexData->push_back(4);
-    indexData->push_back(5);
-    indexData->push_back(6);
-    indexData->push_back(7);
-    indexData->push_back(8);
-    indexData->push_back(9);
-    indexData->push_back(10);
-    indexData->push_back(11);
-    indexData->push_back(12);
-    indexData->push_back(13);
-    indexData->push_back(14);
-    indexData->push_back(15);
-    indexData->push_back(16);
-    indexData->push_back(17);
-    indexData->push_back(18);
-    indexData->push_back(19);
-    indexData->push_back(20);
-    indexData->push_back(21);
-    indexData->push_back(22);
-    indexData->push_back(23);
-    indexData->push_back(24);
-    indexData->push_back(25);
-    indexData->push_back(26);
-    indexData->push_back(27);
-    indexData->push_back(28);
-    indexData->push_back(29);
-    indexData->push_back(30);
-    indexData->push_back(31);
-    indexData->push_back(32);
-    indexData->push_back(33);
-    indexData->push_back(34);
-    indexData->push_back(35);
+    std::shared_ptr<std::vector<uint32_t>> indexData = std::make_shared<std::vector<uint32_t>>(
+                                                        std::initializer_list<uint32_t>({
+                                                            (0) ,     (1) ,     (2) ,     (3) ,
+                                                            (4) ,     (5) ,     (6) ,     (7) ,
+                                                            (8) ,     (9) ,     (10),     (11),
+                                                            (12),     (13),     (14),     (15),
+                                                            (16),     (17),     (18),     (19),
+                                                            (20),     (21),     (22),     (23),
+                                                            (24),     (25),     (26),     (27),
+                                                            (28),     (29),     (30),     (31),
+                                                            (32),     (33),     (34),     (35)}));
     vertexBuffer = std::make_shared<VertexBuffer>(vertexData);
     indexBuffer  = std::make_shared<IndexBuffer>(indexData);
     vertexElements.emplace_back(3, ElementDataType::FLOAT, true, 5 * sizeof(float));

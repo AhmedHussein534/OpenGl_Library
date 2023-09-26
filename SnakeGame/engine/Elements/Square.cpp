@@ -42,27 +42,15 @@ Square::Square(float x, float y, float length,
                                                                   m_center(x+length/2.0f,y-length/2.0f,0.0f)
 {
     shader = std::make_shared<Shader>(vertexShader, fragmentShader);
-    std::shared_ptr<std::vector<float>> vertexData = std::make_shared<std::vector<float>>();
-    std::shared_ptr<std::vector<uint32_t>> indexData = std::make_shared<std::vector<uint32_t>>();
 
-    vertexData->push_back(m_x);
-    vertexData->push_back(m_y);
-    vertexData->push_back(m_x + m_length);
-    vertexData->push_back(m_y);
-    vertexData->push_back(m_x + m_length);
-    vertexData->push_back(m_y - m_length);
-    vertexData->push_back(m_x);
-    vertexData->push_back(m_y - m_length);
+    std::shared_ptr<std::vector<float>> vertexData = std::make_shared<std::vector<float>>(std::initializer_list<float>({
+                                                        (m_x)           ,     (m_y),
+                                                        (m_x + m_length),     (m_y),
+                                                        (m_x + m_length),     (m_y - m_length),
+                                                        (m_x)           ,     (m_y - m_length)}));
 
+    std::shared_ptr<std::vector<uint32_t>> indexData = std::make_shared<std::vector<uint32_t>>(std::initializer_list<uint32_t>({0, 1, 2, 2, 3, 0}));
     vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 2 * sizeof(float));
-
-    indexData->push_back(0);
-    indexData->push_back(1);
-    indexData->push_back(2);
-    indexData->push_back(2);
-    indexData->push_back(3);
-    indexData->push_back(0);
-
     vertexBuffer = std::make_shared<VertexBuffer>(vertexData),
     indexBuffer  = std::make_shared<IndexBuffer>(indexData);
 }
