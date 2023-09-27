@@ -13,7 +13,7 @@
 #include "engine/Renderer2D.hpp"
 #include "engine/Timestep.hpp"
 #include "events/EventDispatcher.hpp"
-
+#include "engine/Debug.hpp"
 
 #include "window/Windows/WindowsWindow.hpp"
 
@@ -50,6 +50,7 @@ constexpr size_t borderCount = 4;
 
 bool initBorders(std::array<std::shared_ptr<border>, borderCount> borders)
 {
+    HZ_PROFILE_FUNCTION();
     std::array<float, borderCount> xCoordinates = {-halfCoordinate                , -halfCoordinate , -halfCoordinate,  halfCoordinate - wormPieceVisible};
     std::array<float, borderCount> yCoordinates = {wormPieceVisible - halfCoordinate,  halfCoordinate,   halfCoordinate,  halfCoordinate};
     std::array<float, borderCount> length = {coordinateSize, wormPieceVisible, coordinateSize, wormPieceVisible};
@@ -65,8 +66,9 @@ bool initBorders(std::array<std::shared_ptr<border>, borderCount> borders)
     return true;
 }
 
-bool isTwoPiecesCollided(const std::shared_ptr<WormPiece> p1, const std::shared_ptr<WormPiece> p2)
+bool isTwoPiecesCollided(const std::shared_ptr<WormPiece> &p1, const std::shared_ptr<WormPiece> &p2)
 {
+    HZ_PROFILE_FUNCTION();
     bool ret = false;
     if ((p1 == nullptr) || (p2 == nullptr))
     {
@@ -88,6 +90,7 @@ bool isTwoPiecesCollided(const std::shared_ptr<WormPiece> p1, const std::shared_
 
 bool isPieceOutside(const std::shared_ptr<WormPiece> piece)
 {
+    HZ_PROFILE_FUNCTION();
     bool ret = false;
     if ((piece == nullptr))
     {
@@ -110,6 +113,7 @@ bool isPieceOutside(const std::shared_ptr<WormPiece> piece)
 
 glm::vec3 getDirectionUnitVector(MOVE_DIRECTION direction)
 {
+    HZ_PROFILE_FUNCTION();
     switch(direction)
     {
         case MOVE_DIRECTION::UP: {
@@ -199,6 +203,7 @@ void onEvent(Event& e)
 
 void initWorm(Worm &worm)
 {
+    HZ_PROFILE_FUNCTION();
     float currentXPiecePos = 0.0f - (wormPieceSize / 2.0f);
     for (uint32_t i = 0; i < wormLen; i++)
     {
@@ -212,6 +217,7 @@ void initWorm(Worm &worm)
 
 void moveWormPieceInDirection(std::shared_ptr<WormPiece> piece, float step = wormPieceSize, MOVE_DIRECTION direction = MOVE_DIRECTION::UP)
 {
+    HZ_PROFILE_FUNCTION();
     auto pieceModel = piece->getModel();
     auto dirUnitVector = getDirectionUnitVector(direction);
     *pieceModel = glm::translate(*pieceModel, dirUnitVector * step);
@@ -219,6 +225,7 @@ void moveWormPieceInDirection(std::shared_ptr<WormPiece> piece, float step = wor
 
 void moveWormPieceToOther(std::shared_ptr<WormPiece> pieceToMove, std::shared_ptr<WormPiece> otherPiece, float step = wormPieceSize)
 {
+    HZ_PROFILE_FUNCTION();
     auto pieceModel = pieceToMove->getModel();
     auto center = pieceToMove->getCenter();
     glm::vec3 nextPieceCenter = otherPiece->getCenter();
@@ -227,6 +234,7 @@ void moveWormPieceToOther(std::shared_ptr<WormPiece> pieceToMove, std::shared_pt
 
 void moveWorm(Worm &worm, float step = wormPieceSize, MOVE_DIRECTION direction = MOVE_DIRECTION::UP)
 {
+    HZ_PROFILE_FUNCTION();
     auto it = worm.begin();
     while (it != worm.end())
     {
@@ -246,6 +254,7 @@ void moveWorm(Worm &worm, float step = wormPieceSize, MOVE_DIRECTION direction =
 
 std::shared_ptr<WormPiece> createRandomFood()
 {
+    HZ_PROFILE_FUNCTION();
     float align = wormPieceSize;
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine gen(seed);
@@ -259,15 +268,19 @@ std::shared_ptr<WormPiece> createRandomFood()
 
 bool isWormSelfCollided(Worm &worm)
 {
+    HZ_PROFILE_FUNCTION();
     bool isSelfCollided = false;
     auto it = worm.rbegin();
     auto head = it;
     it++;
+
+    int i = 0;
     for (; it != worm.rend(); ++it)
     {
         if (isTwoPiecesCollided(*head, *it))
         {
             isSelfCollided = true;
+            break;
         }
     }
 
@@ -294,6 +307,7 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
         auto delta = time.getDelta<std::milli>();
         if (delta >= (1000.0f / fps))
         {
+
             time.notifyUpdate();
             moveWorm(worm, step, moveDirection);
             if (isWormSelfCollided(worm))
@@ -326,7 +340,6 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
             }
 
             lastMoveDirection = moveDirection;
-
         }
     }
 
