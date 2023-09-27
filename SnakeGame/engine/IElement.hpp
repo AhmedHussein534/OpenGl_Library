@@ -54,6 +54,7 @@ namespace GL_ENGINE
 		}
 	};
 
+
 	class IElement
 	{
 	public:
@@ -85,6 +86,11 @@ namespace GL_ENGINE
 		std::shared_ptr<Shader> getShader()
 		{
 			return shader;
+		}
+
+		static GL_ENGINE::ElementType getDefaultElementId()
+		{
+			return typeid(IElement);
 		}
 
 		virtual ElementType getElementType() = 0;

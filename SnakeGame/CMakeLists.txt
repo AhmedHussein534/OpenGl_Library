@@ -33,6 +33,7 @@ add_executable (SnakeGame
 				"engine/VertexArray.cpp"
 				"engine/Shader.cpp"
 				"engine/Layout.cpp"
+				"engine/Renderer2D.cpp"
 				"engine/Elements/Square.cpp"
 				"engine/Elements/Rectangle.cpp"
 				"engine/Elements/Texture.cpp"

@@ -5,15 +5,12 @@
 #include <memory>
 #include <chrono>
 #include <windows.h>
-#include <unistd.h>
-#include <bits/stdc++.h>
 #include <random>
 #include <vector>
 #include <array>
 
-#include "engine/Layout.hpp"
 #include "engine/Elements/Rectangle.hpp"
-#include "engine/Cameras/OrthographicCamera.hpp"
+#include "engine/Renderer2D.hpp"
 #include "engine/Timestep.hpp"
 #include "events/EventDispatcher.hpp"
 
@@ -51,7 +48,7 @@ MOVE_DIRECTION lastMoveDirection = MOVE_DIRECTION::UP;
 float aspectRatio = 0.0f;
 constexpr size_t borderCount = 4;
 
-bool initBorders(std::shared_ptr<GL_ENGINE::Layout> layout, std::array<std::shared_ptr<border>, borderCount> borders)
+bool initBorders(std::array<std::shared_ptr<border>, borderCount> borders)
 {
     std::array<float, borderCount> xCoordinates = {-halfCoordinate                , -halfCoordinate , -halfCoordinate,  halfCoordinate - wormPieceVisible};
     std::array<float, borderCount> yCoordinates = {wormPieceVisible - halfCoordinate,  halfCoordinate,   halfCoordinate,  halfCoordinate};
@@ -61,9 +58,11 @@ bool initBorders(std::shared_ptr<GL_ENGINE::Layout> layout, std::array<std::shar
     for (auto &it : borders)
     {
         it = std::make_shared<border>(xCoordinates[currentBorder], yCoordinates[currentBorder], length[currentBorder], width[currentBorder]);
-        layout->addElement(it);
+        GL_ENGINE::Renderer2D::getRenderer().addElement(it);
         currentBorder++;
     }
+
+    return true;
 }
 
 bool isTwoPiecesCollided(const std::shared_ptr<WormPiece> p1, const std::shared_ptr<WormPiece> p2)
@@ -198,14 +197,14 @@ void onEvent(Event& e)
 }
 
 
-void initWorm(Worm &worm,  std::shared_ptr<GL_ENGINE::Layout> layout)
+void initWorm(Worm &worm)
 {
     float currentXPiecePos = 0.0f - (wormPieceSize / 2.0f);
     for (uint32_t i = 0; i < wormLen; i++)
     {
         auto piece = std::make_shared<WormPiece>(currentXPiecePos, startYPos, wormPieceVisible, wormPieceVisible); //only draw 80% of each size to leave gap
         worm.push_back(piece);
-        layout->addElement(piece);
+        GL_ENGINE::Renderer2D::getRenderer().addElement(piece);
         currentXPiecePos += wormPieceSize;
     }
 
@@ -245,7 +244,7 @@ void moveWorm(Worm &worm, float step = wormPieceSize, MOVE_DIRECTION direction =
 
 }
 
-std::shared_ptr<WormPiece> createRandomFood(std::shared_ptr<GL_ENGINE::Layout> layout)
+std::shared_ptr<WormPiece> createRandomFood()
 {
     float align = wormPieceSize;
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -254,7 +253,7 @@ std::shared_ptr<WormPiece> createRandomFood(std::shared_ptr<GL_ENGINE::Layout> l
     float x = static_cast<float>(static_cast<int>(distribution(gen) / align)) * align;
     float y = static_cast<float>(static_cast<int>(distribution(gen) / align)) * align;
     auto foodShared = std::make_shared<WormPiece>(x - wormPieceSize / 2.0f, y + wormPieceSize / 2.0f, wormPieceVisible, wormPieceVisible, 255.0f, 0.0f, 0.0f);
-    layout->addElement(foodShared);
+    GL_ENGINE::Renderer2D::getRenderer().addElement(foodShared);
     return foodShared;
 }
 
@@ -281,17 +280,13 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
 {
     GL_ENGINE::Timestep time;
     auto step = wormPieceSize;
-    std::shared_ptr<GL_ENGINE::OrthographicCamera> m_camera = std::make_shared<GL_ENGINE::OrthographicCamera>(-halfCoordinate * aspectRatio, halfCoordinate * aspectRatio, -halfCoordinate, halfCoordinate);
-    std::vector<std::shared_ptr<GL_ENGINE::Layout>> layouts = {};
-    std::shared_ptr<GL_ENGINE::Layout> wormLayout = std::make_shared<GL_ENGINE::Layout>();
+    GL_ENGINE::Renderer2D::getRenderer().beginScene(-halfCoordinate * aspectRatio, halfCoordinate * aspectRatio, -halfCoordinate, halfCoordinate);
     Worm worm = {};
     std::array<std::shared_ptr<border>, borderCount> borders = {};
-    std::weak_ptr<WormPiece> food = createRandomFood(wormLayout);
+    std::weak_ptr<WormPiece> food = createRandomFood();
 
-    layouts.push_back(wormLayout);
-
-    initWorm(worm, wormLayout);
-    initBorders(wormLayout, borders);
+    initWorm(worm);
+    initBorders(borders);
     std::cout << "Score: 0" << std::endl;
 
     while (!shouldClose)
@@ -300,29 +295,6 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
         if (delta >= (1000.0f / fps))
         {
             time.notifyUpdate();
-            if (isTwoPiecesCollided(worm.back(), food.lock()))
-            {
-                moveWormPieceInDirection(food.lock(), step, moveDirection);
-                worm.push_back(food.lock());
-                food = createRandomFood(wormLayout);
-                if (worm.size() % 5 == 0)
-                {
-                    fps = fps * 1.1f;
-                }
-
-                std::cout << "Score: " << worm.size() - wormLen << std::endl;
-            }
-
-            for (auto& l : layouts)
-            {
-                if (!shouldClose)
-                {
-                    l->draw(m_camera);
-                    window->OnUpdate();
-                }
-            }
-
-            lastMoveDirection = moveDirection;
             moveWorm(worm, step, moveDirection);
             if (isWormSelfCollided(worm))
             {
@@ -333,12 +305,32 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
             {
                 break;
             }
-        }
-        else
-        {
-            sleep((1000.0f / fps)/10000.0);
+
+            if (isTwoPiecesCollided(worm.back(), food.lock()))
+            {
+                moveWormPieceInDirection(food.lock(), step, moveDirection);
+                worm.push_back(food.lock());
+                food = createRandomFood();
+                if (worm.size() % 5 == 0)
+                {
+                    fps = fps * 1.1f;
+                }
+
+                std::cout << "Score: " << worm.size() - wormLen << std::endl;
+            }
+
+            if (!shouldClose)
+            {
+                GL_ENGINE::Renderer2D::getRenderer().drawScene();
+                window->OnUpdate();
+            }
+
+            lastMoveDirection = moveDirection;
+
         }
     }
+
+    GL_ENGINE::Renderer2D::getRenderer().endScene();
 }
 
 int main(void)
