@@ -27,6 +27,16 @@ namespace GL_ENGINE
 
 		virtual glm::vec3 getCenter() override;
 
+		virtual ElementType getElementType() override
+        {
+            return std::type_index(typeid(Texture3D));
+        }
+
+		virtual std::string getElementName() override
+		{
+			return "Texture3D";
+		}
+
 		~Texture3D();
 
 	private:

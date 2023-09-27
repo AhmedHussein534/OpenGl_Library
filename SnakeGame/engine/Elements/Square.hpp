@@ -32,6 +32,16 @@ namespace GL_ENGINE
 
         virtual glm::vec3 getCenter() override;
 
+        virtual ElementType getElementType() override
+        {
+            return std::type_index(typeid(Square));
+        }
+
+        virtual std::string getElementName() override
+		{
+			return "Square";
+		}
+
 
     private:
         float m_x;

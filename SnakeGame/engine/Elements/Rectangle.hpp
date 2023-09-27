@@ -33,10 +33,20 @@ namespace GL_ENGINE
             return m_width;
         }
 
+        virtual ElementType getElementType() override
+        {
+            return std::type_index(typeid(Rectangle));
+        }
+
 
         unsigned int getIndicesCount() override;
 
         virtual glm::vec3 getCenter() override;
+
+        virtual std::string getElementName() override
+		{
+			return "Rectangle";
+		}
 
 
     private:

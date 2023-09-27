@@ -4,7 +4,7 @@
 
 namespace GL_ENGINE
 {
-    Layout::Layout() : batchCached(false)
+    Layout::Layout() : batchCached(false), isShaderBinded(false), currentShaderClass(typeid(IElement))
     {
         glEnable(GL_DEPTH_TEST);
         vArray.bind();
@@ -31,13 +31,15 @@ namespace GL_ENGINE
         vArray.bind();
         for (auto& v : elementMap)
         {
-            bool isShaderBound{false};
-
             for (auto e : v.second)
             {
-                if (!isShaderBound)
+                auto elementType = e->getElementType();
+                if (!isShaderBinded || (elementType != currentShaderClass))
                 {
+                    std::cout << "Binding Shader: " << e->getElementName() << std::endl;
+                    isShaderBinded = true;
                     e->getShader()->bind();
+                    currentShaderClass = elementType;
                 }
 
                 e->bind(camera->GetViewProjectionMatrix(), *e->getModel());
@@ -64,61 +66,4 @@ namespace GL_ENGINE
         }
     }
 
-
-    void Layout::drawBatched(std::shared_ptr<ICamera> camera)
-    {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        batchDataContainers.clear();
-
-        if (!batchCached)
-        {
-            for (auto& v : elementMap)
-            {
-                batchDataContainers.emplace_back();
-                BatchDataContainer& typeContainer = batchDataContainers.back();
-                for (auto e : v.second)
-                {
-                    std::cout << "ADDING" << std::endl;
-                    typeContainer.addElementData(e);
-                    std::cout << "ADDING - DONE" << std::endl;
-                }
-            }
-        }
-
-        vArray.bind();
-        for (auto &it : batchDataContainers)
-        {
-            for (auto &d : it.batchVec)
-            {
-                std::cout << "DRAW CALL" << std::endl;
-                auto vertexPtr = d->batchVertexBuffer;
-                auto indexPtr = d->batchIndexBuffer;
-                auto element = d->element;
-                auto model = d->batchVertexModel;
-                vertexPtr->bind();
-                indexPtr->bind();
-                element->bind(camera->GetViewProjectionMatrix());
-                element->getShader()->setUniformValue("model", 1, false, const_cast<float*>(glm::value_ptr(*model)));
-                uint32_t index = 0;
-                int offset = 0;
-                const auto& vertexElements = element->getVertexElements();
-                for (const auto& element : vertexElements)
-                {
-                    glEnableVertexAttribArray(index);
-                    glVertexAttribPointer(index /* index of vertex array*/,
-                        element.count /* number of components per each vertex (x,y) */,
-                        element.getGlDataType() /* type of vertex data (float) */,
-                        (element.normalized ? GL_FALSE : GL_TRUE)/* data is already normalized so false for normalization */,
-                        element.stride /* stride i.e how many bytes to increment to move to next vertex */,
-                        (const void*) offset);
-                    offset += element.count * static_cast<int>(element.getDataSize());
-                    index++;
-                }
-
-                glDrawElements(GL_TRIANGLES, 6*5, GL_UNSIGNED_INT, nullptr);
-            }
-        }
-        std::cout << "drawBatched DONE." << std::endl;
-
-    }
 }

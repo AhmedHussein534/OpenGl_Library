@@ -26,6 +26,17 @@ namespace GL_ENGINE
 
         virtual glm::vec3 getCenter() override;
 
+        virtual ElementType getElementType() override
+        {
+            return std::type_index(typeid(Cube));
+        }
+
+        virtual std::string getElementName() override
+		{
+			return "Cube";
+		}
+
+
 
     private:
         float m_x;

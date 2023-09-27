@@ -30,6 +30,16 @@ namespace GL_ENGINE
 
 		~Texture();
 
+		virtual ElementType getElementType() override
+        {
+            return std::type_index(typeid(Texture));
+        }
+
+		virtual std::string getElementName() override
+		{
+			return "Texture";
+		}
+
 	private:
 		uint32_t m_rendererId;
 		uint8_t* m_localBuffer;

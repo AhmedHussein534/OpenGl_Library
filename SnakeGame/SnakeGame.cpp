@@ -12,7 +12,6 @@
 #include <array>
 
 #include "engine/Layout.hpp"
-#include "engine/Elements/Square.hpp"
 #include "engine/Elements/Rectangle.hpp"
 #include "engine/Cameras/OrthographicCamera.hpp"
 #include "engine/Timestep.hpp"
@@ -25,7 +24,7 @@
 #define SWAP_INTERVAL 1
 
 
-using WormPiece = GL_ENGINE::Square;
+using WormPiece = GL_ENGINE::Rectangle;
 using WormPiecePtr = std::shared_ptr<WormPiece>;
 using Worm = std::list<std::shared_ptr<WormPiece>>;
 using border = GL_ENGINE::Rectangle;
@@ -88,7 +87,7 @@ bool isTwoPiecesCollided(const std::shared_ptr<WormPiece> p1, const std::shared_
     return ret;
 }
 
-bool isPieceOutside(const std::shared_ptr<GL_ENGINE::Square> piece)
+bool isPieceOutside(const std::shared_ptr<WormPiece> piece)
 {
     bool ret = false;
     if ((piece == nullptr))
@@ -100,10 +99,10 @@ bool isPieceOutside(const std::shared_ptr<GL_ENGINE::Square> piece)
         auto squareCenter = piece->getCenter();
         int squareX = static_cast<int>(squareCenter[0]);
         int squareY = static_cast<int>(squareCenter[1]);
-        ret = (squareX > static_cast<int>(halfCoordinate - wormPieceSize)) ||
-              (squareX < static_cast<int>(-halfCoordinate + wormPieceSize)) ||
-              (squareY < static_cast<int>(-halfCoordinate + wormPieceSize)) ||
-              (squareY > static_cast<int>(halfCoordinate - wormPieceSize));
+        ret = (squareX > static_cast<int>(halfCoordinate - wormPieceVisible)) ||
+              (squareX < static_cast<int>(-halfCoordinate + wormPieceVisible)) ||
+              (squareY < static_cast<int>(-halfCoordinate + wormPieceVisible)) ||
+              (squareY > static_cast<int>(halfCoordinate - wormPieceVisible));
     }
 
     return ret;
@@ -134,7 +133,7 @@ glm::vec3 getDirectionUnitVector(MOVE_DIRECTION direction)
 
 std::shared_ptr<WindowsWindow> init()
 {
-    std::shared_ptr<WindowsWindow> window = std::make_shared<WindowsWindow>(WindowProps{"Mywindow", 1920, 1080});
+    std::shared_ptr<WindowsWindow> window = std::make_shared<WindowsWindow>(WindowProps{"Mywindow", 1000, 1000});
     GLenum err = glewInit();
     if (err != GLEW_OK)
     {
@@ -204,7 +203,7 @@ void initWorm(Worm &worm,  std::shared_ptr<GL_ENGINE::Layout> layout)
     float currentXPiecePos = 0.0f - (wormPieceSize / 2.0f);
     for (uint32_t i = 0; i < wormLen; i++)
     {
-        auto piece = std::make_shared<GL_ENGINE::Square>(currentXPiecePos, startYPos, wormPieceVisible); //only draw 80% of each size to leave gap
+        auto piece = std::make_shared<WormPiece>(currentXPiecePos, startYPos, wormPieceVisible, wormPieceVisible); //only draw 80% of each size to leave gap
         worm.push_back(piece);
         layout->addElement(piece);
         currentXPiecePos += wormPieceSize;
@@ -254,7 +253,7 @@ std::shared_ptr<WormPiece> createRandomFood(std::shared_ptr<GL_ENGINE::Layout> l
     std::uniform_real_distribution<float> distribution(-halfCoordinate + wormPieceSize, halfCoordinate - wormPieceSize);
     float x = static_cast<float>(static_cast<int>(distribution(gen) / align)) * align;
     float y = static_cast<float>(static_cast<int>(distribution(gen) / align)) * align;
-    auto foodShared = std::make_shared<WormPiece>(x - wormPieceSize / 2.0f, y + wormPieceSize / 2.0f, wormPieceVisible, 255.0f, 0.0f, 0.0f);
+    auto foodShared = std::make_shared<WormPiece>(x - wormPieceSize / 2.0f, y + wormPieceSize / 2.0f, wormPieceVisible, wormPieceVisible, 255.0f, 0.0f, 0.0f);
     layout->addElement(foodShared);
     return foodShared;
 }
@@ -293,13 +292,13 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
 
     initWorm(worm, wormLayout);
     initBorders(wormLayout, borders);
+    std::cout << "Score: 0" << std::endl;
 
     while (!shouldClose)
     {
         auto delta = time.getDelta<std::milli>();
         if (delta >= (1000.0f / fps))
         {
-            std::cout << delta << std::endl;
             time.notifyUpdate();
             if (isTwoPiecesCollided(worm.back(), food.lock()))
             {
@@ -310,6 +309,8 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
                 {
                     fps = fps * 1.1f;
                 }
+
+                std::cout << "Score: " << worm.size() - wormLen << std::endl;
             }
 
             for (auto& l : layouts)
@@ -332,6 +333,10 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
             {
                 break;
             }
+        }
+        else
+        {
+            sleep((1000.0f / fps)/10000.0);
         }
     }
 }

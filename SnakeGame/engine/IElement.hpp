@@ -2,19 +2,21 @@
 
 #include <vector>
 #include <utility>
+#include <memory>
+#include <typeinfo>
+#include <typeindex>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <memory>
-#include <typeinfo>
 #include <GL/glew.h>
-
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
 #include "Shader.hpp"
 
 namespace GL_ENGINE
 {
+	using ElementType = std::type_index;
     enum class ElementDataType : uint32_t
 	{
 		FLOAT = GL_FLOAT,
@@ -85,6 +87,8 @@ namespace GL_ENGINE
 			return shader;
 		}
 
+		virtual ElementType getElementType() = 0;
+
 		virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f), const glm::mat4 &model = glm::mat4(1.0f)) = 0;
 
 		virtual void unbind() = 0;
@@ -95,7 +99,10 @@ namespace GL_ENGINE
 
 		virtual glm::vec3 getCenter() = 0;
 
+		virtual std::string getElementName() = 0;
+
 		virtual ~IElement() = default;
+
 
 	protected:
 		std::shared_ptr<VertexBuffer> vertexBuffer;
