@@ -34,7 +34,6 @@ enum class MOVE_DIRECTION : uint32_t
     LEFT,
 };
 
-
 bool shouldClose = false;
 const float coordinateSize = 1000.0f;
 const float halfCoordinate = coordinateSize / 2.0f;
@@ -301,22 +300,20 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
     initWorm(worm);
     initBorders(borders);
     std::cout << "Score: 0" << std::endl;
-
+    float deltaTime = 1000.0f / fps;
+    float sleepTime = 0.1f * deltaTime;
     while (!shouldClose)
     {
+
         auto delta = time.getDelta<std::milli>();
-        if (delta >= (1000.0f / fps))
+        if (delta >= deltaTime - sleepTime)
         {
 
             time.notifyUpdate();
-            moveWorm(worm, step, moveDirection);
-            if (isWormSelfCollided(worm))
-            {
-                std::cout << "Game over" << std::endl;
-                break;
-            }
 
-            if (isPieceOutside(worm.back()))
+            moveWorm(worm, step, moveDirection);
+
+            if (isWormSelfCollided(worm) || isPieceOutside(worm.back()))
             {
                 std::cout << "Game over" << std::endl;
                 break;
@@ -330,6 +327,8 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
                 if (worm.size() % 5 == 0)
                 {
                     fps = fps * 1.1f;
+                    deltaTime = 1000.0f / fps;
+                    sleepTime = 0.1f * deltaTime;
                 }
 
                 std::cout << "Score: " << worm.size() - wormLen << std::endl;
@@ -342,6 +341,10 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
             }
 
             lastMoveDirection = moveDirection;
+        }
+        else
+        {
+            Sleep(sleepTime);
         }
     }
 
