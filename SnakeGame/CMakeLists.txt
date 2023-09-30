@@ -2,6 +2,7 @@
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.1)
+set(CMAKE_BUILD_TYPE Release)
 
 set(BOOST_ROOT "C:\\local\\boost_1_83_0")
 find_package(OpenGL REQUIRED)

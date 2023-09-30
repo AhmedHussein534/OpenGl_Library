@@ -30,10 +30,10 @@ namespace GL_ENGINE
 
     private:
         Renderer2D();
+        void createAndBindShader(const ElementType &type, const std::string &vertexShaderText, const std::string &indexShaderText);
         void drawElementsIndexed(const std::vector<VertexElement>& vertexElements, uint32_t indexCount);
 
 	private:
-		bool isShaderBinded;
         bool sceneExists;
 		GL_ENGINE::ElementType currentShaderClass;
 		std::unordered_map<GL_ENGINE::ElementType, std::vector<std::shared_ptr<IElement>>> elementMap;
