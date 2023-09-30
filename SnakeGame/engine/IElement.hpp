@@ -68,16 +68,6 @@ namespace GL_ENGINE
 
 		}
 
-		std::shared_ptr<VertexBuffer> getVertexBuffer()
-		{
-			return vertexBuffer;
-		}
-
-		std::shared_ptr<IndexBuffer> getIndexBuffer()
-		{
-			return indexBuffer;
-		}
-
 		std::shared_ptr<glm::mat4> getModel()
 		{
 			return m_model;
@@ -95,13 +85,21 @@ namespace GL_ENGINE
 
 		virtual ElementType getElementType() = 0;
 
+		virtual size_t getIndicesSize() const = 0;
+
+        virtual size_t getVerticesSize() const = 0;
+
+		virtual size_t getIndicesCount() const = 0;
+
 		virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f), const glm::mat4 &model = glm::mat4(1.0f)) = 0;
 
 		virtual void unbind() = 0;
 
-		virtual const std::vector<VertexElement>& getVertexElements() = 0;
+		virtual void fillVertices(void* v_ptr, int &size) = 0;
 
-		virtual unsigned int getIndicesCount() = 0;
+		virtual void fillIndices(void* v_ptr, int &offset, int &size) = 0;
+
+		virtual const std::vector<VertexElement>& getVertexElements() = 0;
 
 		virtual glm::vec3 getCenter() = 0;
 
@@ -109,10 +107,7 @@ namespace GL_ENGINE
 
 		virtual ~IElement() = default;
 
-
 	protected:
-		std::shared_ptr<VertexBuffer> vertexBuffer;
-		std::shared_ptr<IndexBuffer> indexBuffer;
 		std::shared_ptr<glm::mat4> m_model;
 		std::shared_ptr<Shader> shader;
 	};

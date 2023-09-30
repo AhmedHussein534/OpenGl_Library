@@ -312,11 +312,13 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
             moveWorm(worm, step, moveDirection);
             if (isWormSelfCollided(worm))
             {
+                std::cout << "Game over" << std::endl;
                 break;
             }
 
             if (isPieceOutside(worm.back()))
             {
+                std::cout << "Game over" << std::endl;
                 break;
             }
 

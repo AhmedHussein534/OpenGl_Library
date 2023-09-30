@@ -23,6 +23,12 @@ namespace GL_ENGINE
 
         const std::vector<VertexElement>& getVertexElements() override;
 
+        size_t getIndicesSize() const override;
+
+        size_t getVerticesSize() const override;
+
+        size_t getIndicesCount() const override;
+
         float getLength()
         {
             return m_length;
@@ -39,14 +45,16 @@ namespace GL_ENGINE
         }
 
 
-        unsigned int getIndicesCount() override;
-
         virtual glm::vec3 getCenter() override;
 
         virtual std::string getElementName() override
 		{
 			return "Rectangle";
 		}
+
+        virtual void fillVertices(void* v_ptr, int &size) override;
+
+		virtual void fillIndices(void* v_ptr, int &offset, int &size) override;
 
 
     private:

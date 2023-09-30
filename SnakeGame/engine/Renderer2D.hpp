@@ -37,5 +37,10 @@ namespace GL_ENGINE
 		std::unordered_map<GL_ENGINE::ElementType, std::vector<std::shared_ptr<IElement>>> elementMap;
 		std::shared_ptr<Layout> m_layout;
         std::shared_ptr<OrthographicCamera> m_camera;
+
+        std::unique_ptr<uint8_t[]> vertexCpuBuffer;
+        std::unique_ptr<uint8_t[]> indexCpuBuffer;
+        std::unique_ptr<VertexBuffer> m_vertexBuffer;
+        std::unique_ptr<IndexBuffer> m_indexBuffer;
 	};
 }

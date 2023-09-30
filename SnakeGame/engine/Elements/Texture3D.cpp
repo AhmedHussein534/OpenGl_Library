@@ -113,11 +113,9 @@ namespace GL_ENGINE
                                                                 (24),     (25),     (26),     (27),
                                                                 (28),     (29),     (30),     (31),
                                                                 (32),     (33),     (34),     (35)}));
-        vertexBuffer = std::make_shared<VertexBuffer>(vertexData);
-        indexBuffer  = std::make_shared<IndexBuffer>(indexData);
+
         vertexElements.emplace_back(3, ElementDataType::FLOAT, true, 5 * sizeof(float));
         vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 5 * sizeof(float));
-
     }
 
     glm::vec3 Texture3D::getCenter()

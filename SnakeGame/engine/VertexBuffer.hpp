@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 #include <cstdint>
-#include <iostream>
+#include <stddef.h>
 
 namespace GL_ENGINE
 {
@@ -12,11 +12,9 @@ namespace GL_ENGINE
 	public:
 		VertexBuffer(std::shared_ptr<std::vector<float>> dataPtr);
 
-		VertexBuffer(VertexBuffer &other);
+		VertexBuffer(size_t size);
 
-		VertexBuffer(VertexBuffer &&other);
-
-		VertexBuffer& operator+(const VertexBuffer &other);
+		void setData(const void *data, size_t size);
 
 		void bind();
 
@@ -25,7 +23,7 @@ namespace GL_ENGINE
 		~VertexBuffer();
 
 	private:
-		unsigned int renderId;
+		uint32_t renderId;
 		bool isBindedBefore;
 		std::shared_ptr<std::vector<float>> m_data;
 	};

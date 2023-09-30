@@ -11,21 +11,34 @@ namespace
     const std::string vertexShader =
         "#version 410 core\n"
         "layout(location = 0) in vec4 position;\n"
-        "uniform mat4 model;\n"
+        "layout(location = 1) in vec4 color;\n"
+        "out vec4 m_color;\n"
         "uniform mat4 projectionview;\n"
         "void main()\n"
         "{\n"
-        "    gl_Position = projectionview * model * position;\n"
+        "    gl_Position = projectionview * position;\n"
+        "    m_color = color;\n"
         "}\n";
 
     const std::string fragmentShader =
         "#version 410 core\n"
         "layout(location = 0) out vec4 color;\n"
-        "uniform vec4 u_Color;\n"
+        "in vec4 m_color;\n"
         "void main()\n"
         "{\n"
-        "    color = u_Color;\n"
+        "    color = m_color;\n"
         "}\n";
+
+    struct RectangleVertex
+    {
+        glm::vec4 pos;
+        glm::vec4 color;
+    };
+
+    struct RectangleIndex
+    {
+        uint32_t index;
+    };
 }
 
 
@@ -50,18 +63,15 @@ namespace GL_ENGINE
                                                             (m_x + m_length),     (m_y - m_width),
                                                             (m_x)           ,     (m_y - m_width)}));
         std::shared_ptr<std::vector<uint32_t>> indexData = std::make_shared<std::vector<uint32_t>>(std::initializer_list<uint32_t>({0, 1, 2, 2, 3, 0}));
-        vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 2 * sizeof(float));
-        vertexBuffer = std::make_shared<VertexBuffer>(vertexData),
-        indexBuffer  = std::make_shared<IndexBuffer>(indexData);
+        vertexElements.emplace_back(4, ElementDataType::FLOAT, true, 8 * sizeof(float));
+        vertexElements.emplace_back(4, ElementDataType::FLOAT, true, 8 * sizeof(float));
     }
 
 
 
     void Rectangle::bind(const glm::mat4 &viewProjection, const glm::mat4 &model)
     {
-        shader->setUniformValue("u_Color", m_r, m_g, m_b, m_a);
         shader->setUniformValue("projectionview", 1, false, const_cast<float*>(glm::value_ptr(viewProjection)));
-        shader->setUniformValue("model", 1, false, const_cast<float*>(glm::value_ptr(*m_model)));
     }
 
     void Rectangle::unbind()
@@ -69,11 +79,66 @@ namespace GL_ENGINE
         shader->unbind();
     }
 
+    size_t Rectangle::getIndicesSize() const
+    {
+        return 6 * sizeof(RectangleIndex);
+    }
 
-    unsigned int Rectangle::getIndicesCount()
+    size_t Rectangle::getVerticesSize() const
+    {
+        return 4 * sizeof(RectangleVertex);
+    }
+
+    size_t Rectangle::getIndicesCount() const
     {
         return 6;
     }
+
+
+    void Rectangle::fillVertices(void* v_ptr, int &size)
+    {
+
+        size = 0;
+        RectangleVertex* vertex = reinterpret_cast<RectangleVertex*>(v_ptr);
+        vertex->pos = *m_model * glm::vec4{m_x, m_y, 0.0f, 1.0f};
+        vertex->color = glm::vec4{m_r, m_g, m_b, m_a};
+        size += sizeof(RectangleVertex);
+
+        vertex++;
+        vertex->pos = *m_model * glm::vec4{m_x + m_length, m_y, 0.0f, 1.0f};
+        vertex->color = glm::vec4{m_r, m_g, m_b, m_a};
+        size += sizeof(RectangleVertex);
+
+        vertex++;
+        vertex->pos = *m_model * glm::vec4{m_x + m_length, m_y - m_width, 0.0f, 1.0f};
+        vertex->color = glm::vec4{m_r, m_g, m_b, m_a};
+        size += sizeof(RectangleVertex);
+
+        vertex++;
+        vertex->pos = *m_model * glm::vec4{m_x, m_y - m_width, 0.0f, 1.0f};
+        vertex->color = glm::vec4{m_r, m_g, m_b, m_a};
+        size += sizeof(RectangleVertex);
+    }
+
+    void Rectangle::fillIndices(void* v_ptr, int &offset, int &count)
+    {
+        RectangleIndex* index = reinterpret_cast<RectangleIndex*>(v_ptr);
+        index->index = offset + 0;
+        index += 1;
+        index->index = offset + 1;
+        index += 1;
+        index->index = offset + 2;
+        index += 1;
+        index->index = offset + 2;
+        index += 1;
+        index->index = offset + 3;
+        index += 1;
+        index->index = offset + 0;
+
+        offset = offset + 3 + 1;
+        count += 6 * sizeof(RectangleIndex);
+    }
+
 
     const std::vector<VertexElement>& Rectangle::getVertexElements()
     {
