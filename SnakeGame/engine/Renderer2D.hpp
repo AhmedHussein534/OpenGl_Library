@@ -30,11 +30,14 @@ namespace GL_ENGINE
 
     private:
         Renderer2D();
+        void drawElementsIndexed(const std::vector<VertexElement>& vertexElements, uint32_t indexCount);
+
 	private:
 		bool isShaderBinded;
         bool sceneExists;
 		GL_ENGINE::ElementType currentShaderClass;
 		std::unordered_map<GL_ENGINE::ElementType, std::vector<std::shared_ptr<IElement>>> elementMap;
+        std::unordered_map<GL_ENGINE::ElementType, std::shared_ptr<Shader>> elementShaderMap;
 		std::shared_ptr<Layout> m_layout;
         std::shared_ptr<OrthographicCamera> m_camera;
 
@@ -42,5 +45,6 @@ namespace GL_ENGINE
         std::unique_ptr<uint8_t[]> indexCpuBuffer;
         std::unique_ptr<VertexBuffer> m_vertexBuffer;
         std::unique_ptr<IndexBuffer> m_indexBuffer;
+
 	};
 }

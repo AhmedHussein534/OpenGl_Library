@@ -50,6 +50,7 @@ namespace GL_ENGINE
         m_vertexBuffer = std::make_unique<VertexBuffer>(vertexCpuBufferSize);
         m_indexBuffer = std::make_unique<IndexBuffer>(indexCpuBufferSize);
         sceneExists = true;
+        isShaderBinded = false;
         return m_camera;
     }
 
@@ -70,50 +71,35 @@ namespace GL_ENGINE
                 {
                     const size_t vertexDataSize = elementCount * v.second[0]->getVerticesSize();
                     const size_t indexDataSize = elementCount * v.second[0]->getIndicesSize();
-                    v.second[0]->getShader()->bind();
-                    v.second[0]->bind(m_camera->GetViewProjectionMatrix(), *v.second[0]->getModel());
-                    for (auto e : v.second)
+                    auto elementType = v.second[0]->getElementType();
+                    if (!isShaderBinded || (elementType != currentShaderClass))
                     {
-                        auto elementType = e->getElementType();
-                        if (!isShaderBinded || (elementType != currentShaderClass))
+                        if (elementShaderMap.find(elementType) == elementShaderMap.end())
                         {
-                            isShaderBinded = true;
-                            e->getShader()->bind();
-                            currentShaderClass = elementType;
+                            auto shaderString = v.second[0]->getShaderText();
+                            elementShaderMap[elementType] = std::make_shared<Shader>(shaderString.first, shaderString.second);
+                            elementShaderMap[elementType]->bind();
                         }
 
-                        int verticesSize = 0;
-                        int indicesSize = 0;
-                        e->fillVertices(vertexCpuBuffer.get() + vOffset, verticesSize);
-                        e->fillIndices(indexCpuBuffer.get() + iOffset, maxIndex, indicesSize);
+                        elementShaderMap[elementType]->bind();
+                        elementShaderMap[elementType]->setUniformValue("projectionview", 1, false, const_cast<float*>(glm::value_ptr(m_camera->GetViewProjectionMatrix())));
+                        currentShaderClass = elementType;
+                        isShaderBinded = true;
+                    }
 
-                        vOffset += verticesSize;
-                        iOffset += indicesSize;
+
+
+                    v.second[0]->bind();
+                    for (auto e : v.second)
+                    {
+                        e->fillVertices(vertexCpuBuffer.get() + vOffset, vOffset);
+                        e->fillIndices(indexCpuBuffer.get() + iOffset, maxIndex, iOffset);
                     }
 
                     m_vertexBuffer->setData(vertexCpuBuffer.get(), vertexDataSize);
                     m_indexBuffer->setData(indexCpuBuffer.get(), indexDataSize);
-
-                    uint32_t index = 0;
-                    int offset = 0;
-                    const auto& vertexElements = v.second[0]->getVertexElements();
-                    for (const auto& element : vertexElements)
-                    {
-                        glEnableVertexAttribArray(index);
-                        glVertexAttribPointer(index /* index of vertex array*/,
-                            element.count /* number of components per each vertex (x,y) */,
-                            element.getGlDataType() /* type of vertex data (float) */,
-                            (element.normalized ? GL_FALSE : GL_TRUE)/* data is already normalized so false for normalization */,
-                            element.stride /* stride i.e how many bytes to increment to move to next vertex */,
-                            (const void*) offset);
-                        offset += element.count * static_cast<int>(element.getDataSize());
-                        index++;
-                    }
-
-                    glDrawElements(GL_TRIANGLES, indexDataSize / sizeof(uint32_t), GL_UNSIGNED_INT, nullptr);
+                    drawElementsIndexed(v.second[0]->getVertexElements(), indexDataSize / sizeof(uint32_t));
                 }
-
-
             }
 
             ret = true;
@@ -122,16 +108,38 @@ namespace GL_ENGINE
         return ret;
     }
 
+    void Renderer2D::drawElementsIndexed(const std::vector<VertexElement>& vertexElements, uint32_t indexCount)
+    {
+        uint32_t index = 0;
+        int offset = 0;
+        for (const auto& element : vertexElements)
+        {
+            glEnableVertexAttribArray(index);
+            glVertexAttribPointer(index /* index of vertex array*/,
+                element.count /* number of components per each vertex (x,y) */,
+                element.getGlDataType() /* type of vertex data (float) */,
+                (element.normalized ? GL_FALSE : GL_TRUE)/* data is already normalized so false for normalization */,
+                element.stride /* stride i.e how many bytes to increment to move to next vertex */,
+                (const void*) offset);
+            offset += element.count * static_cast<int>(element.getDataSize());
+            index++;
+        }
+
+        glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+    }
+
     void Renderer2D::endScene()
     {
         isShaderBinded = false;
-		currentShaderClass = IElement::getDefaultElementId();
-		elementMap.clear();
+        sceneExists = false;
 		m_layout = nullptr;
         m_camera = nullptr;
         vertexCpuBuffer = nullptr;
         indexCpuBuffer = nullptr;
         m_vertexBuffer = nullptr;
         m_indexBuffer = nullptr;
+        elementMap.clear();
+        elementShaderMap.clear();
+        currentShaderClass = IElement::getDefaultElementId();
     }
 }

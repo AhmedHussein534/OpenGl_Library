@@ -73,11 +73,6 @@ namespace GL_ENGINE
 			return m_model;
 		}
 
-		std::shared_ptr<Shader> getShader()
-		{
-			return shader;
-		}
-
 		static GL_ENGINE::ElementType getDefaultElementId()
 		{
 			return typeid(IElement);
@@ -91,7 +86,7 @@ namespace GL_ENGINE
 
 		virtual size_t getIndicesCount() const = 0;
 
-		virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f), const glm::mat4 &model = glm::mat4(1.0f)) = 0;
+		virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f)) = 0;
 
 		virtual void unbind() = 0;
 
@@ -105,10 +100,11 @@ namespace GL_ENGINE
 
 		virtual std::string getElementName() = 0;
 
+		virtual std::pair<std::string, std::string> getShaderText() = 0;
+
 		virtual ~IElement() = default;
 
 	protected:
 		std::shared_ptr<glm::mat4> m_model;
-		std::shared_ptr<Shader> shader;
 	};
 }

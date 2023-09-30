@@ -4,7 +4,6 @@
 #include <array>
 
 #include "IElement.hpp"
-#include "Shader.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
 
@@ -17,7 +16,7 @@ namespace GL_ENGINE
         Rectangle(float x, float y, float length, float width,
                 float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f, bool isDataNormalized = true);
 
-        void bind(const glm::mat4 &viewProjection, const glm::mat4 &model) override;
+        void bind(const glm::mat4 &viewProjection) override;
 
         void unbind() override;
 
@@ -28,6 +27,8 @@ namespace GL_ENGINE
         size_t getVerticesSize() const override;
 
         size_t getIndicesCount() const override;
+
+        std::pair<std::string, std::string> getShaderText() override;
 
         float getLength()
         {

@@ -55,8 +55,6 @@ namespace GL_ENGINE
                                                                     m_a(a),
                                                                     m_center(x+length/2.0f,y-width/2.0f,0.0f)
     {
-        shader = std::make_shared<Shader>(vertexShader, fragmentShader);
-
         std::shared_ptr<std::vector<float>> vertexData = std::make_shared<std::vector<float>>(std::initializer_list<float>({
                                                             (m_x)           ,     (m_y),
                                                             (m_x + m_length),     (m_y),
@@ -67,16 +65,17 @@ namespace GL_ENGINE
         vertexElements.emplace_back(4, ElementDataType::FLOAT, true, 8 * sizeof(float));
     }
 
-
-
-    void Rectangle::bind(const glm::mat4 &viewProjection, const glm::mat4 &model)
+    std::pair<std::string, std::string> Rectangle::getShaderText()
     {
-        shader->setUniformValue("projectionview", 1, false, const_cast<float*>(glm::value_ptr(viewProjection)));
+        return {vertexShader, fragmentShader};
+    }
+
+    void Rectangle::bind(const glm::mat4 &viewProjection)
+    {
     }
 
     void Rectangle::unbind()
     {
-        shader->unbind();
     }
 
     size_t Rectangle::getIndicesSize() const
@@ -98,7 +97,6 @@ namespace GL_ENGINE
     void Rectangle::fillVertices(void* v_ptr, int &size)
     {
 
-        size = 0;
         RectangleVertex* vertex = reinterpret_cast<RectangleVertex*>(v_ptr);
         vertex->pos = *m_model * glm::vec4{m_x, m_y, 0.0f, 1.0f};
         vertex->color = glm::vec4{m_r, m_g, m_b, m_a};
