@@ -5,26 +5,25 @@
 #include <string>
 
 #include "IElement.hpp"
-#include "Shader.hpp"
-#include "VertexBuffer.hpp"
-#include "IndexBuffer.hpp"
-
+#include "TextureAsset.hpp"
 
 namespace GL_ENGINE
 {
+
     class Texture : public IElement
 	{
 	public:
-		Texture(uint8_t* localBuffer, int32_t width, int32_t height,
-				int32_t BPP, uint32_t slot, float x, float y, float length);
-
-		void bind(const glm::mat4 &viewProjection, const glm::mat4 &model) override;
-
-		void unbind() override;
+		Texture(std::shared_ptr<TextureAsset> texAsset, float x, float y, float length);
 
 		const std::vector<VertexElement>& getVertexElements() override;
 
-		unsigned int getIndicesCount() override;
+		size_t getIndicesSize() const override;
+
+        size_t getVerticesSize() const override;
+
+        size_t getIndicesCount() const override;
+
+        std::pair<std::string, std::string> getShaderText() override;
 
 		virtual glm::vec3 getCenter() override;
 
@@ -40,30 +39,18 @@ namespace GL_ENGINE
 			return "Texture";
 		}
 
+		virtual bool fillVertices(void* v_ptr, int &size) override;
+
+		virtual bool fillIndices(void* v_ptr, int &offset, int &size) override;
+
 	private:
 		uint32_t m_rendererId;
 		uint8_t* m_localBuffer;
-		int m_width;
-		int m_height;
-		int m_BPP;
 		uint32_t m_activeSlot;
 		float m_x;
 		float m_y;
 		float m_length;
 		glm::vec3 m_center;
 		std::vector<VertexElement> vertexElements;
-	};
-
-
-	class StbTexture
-	{
-	public:
-		StbTexture(const std::string& path);
-
-		std::shared_ptr<Texture> getTex();
-
-		~StbTexture();
-	private:
-		std::shared_ptr<Texture> texPtr;
 	};
 }

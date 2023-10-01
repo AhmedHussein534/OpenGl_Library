@@ -70,14 +70,6 @@ namespace GL_ENGINE
         return {vertexShader, fragmentShader};
     }
 
-    void Rectangle::bind(const glm::mat4 &viewProjection)
-    {
-    }
-
-    void Rectangle::unbind()
-    {
-    }
-
     size_t Rectangle::getIndicesSize() const
     {
         return 6 * sizeof(RectangleIndex);
@@ -94,7 +86,7 @@ namespace GL_ENGINE
     }
 
 
-    void Rectangle::fillVertices(void* v_ptr, int &size)
+    bool Rectangle::fillVertices(void* v_ptr, int &size)
     {
         RectangleVertex* vertex = reinterpret_cast<RectangleVertex*>(v_ptr);
         vertex->pos = *m_model * glm::vec4{m_x, m_y, 0.0f, 1.0f};
@@ -115,9 +107,10 @@ namespace GL_ENGINE
         vertex->pos = *m_model * glm::vec4{m_x, m_y - m_width, 0.0f, 1.0f};
         vertex->color = glm::vec4{m_r, m_g, m_b, m_a};
         size += sizeof(RectangleVertex);
+        return true;
     }
 
-    void Rectangle::fillIndices(void* v_ptr, int &offset, int &count)
+    bool Rectangle::fillIndices(void* v_ptr, int &offset, int &count)
     {
         RectangleIndex* index = reinterpret_cast<RectangleIndex*>(v_ptr);
         index->index = offset + 0;
@@ -134,6 +127,7 @@ namespace GL_ENGINE
 
         offset = offset + 3 + 1;
         count += 6 * sizeof(RectangleIndex);
+        return true;
     }
 
 

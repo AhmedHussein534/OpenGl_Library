@@ -8,7 +8,7 @@ set(BOOST_ROOT "C:\\local\\boost_1_83_0")
 find_package(OpenGL REQUIRED)
 find_package(Boost REQUIRED)
 
-
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 ")
 add_definitions(-DGLEW_STATIC)
 add_definitions(-DGLFW_BUILD_WIN32)
 
@@ -35,9 +35,9 @@ add_executable (SnakeGame
 				"engine/Shader.cpp"
 				"engine/Layout.cpp"
 				"engine/Renderer2D.cpp"
-				# "engine/Elements/Square.cpp"
 				"engine/Elements/Rectangle.cpp"
-				# "engine/Elements/Texture.cpp"
+			    "engine/Elements/Texture.cpp"
+				"engine/Elements/TextureAsset.cpp"
 				# "engine/Elements/Texture3D.cpp"
 				# "engine/Elements/Cube.cpp"
 				"engine/Cameras/OrthographicCamera.cpp"

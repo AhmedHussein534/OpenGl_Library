@@ -5,6 +5,7 @@
 #include <memory>
 #include <typeinfo>
 #include <typeindex>
+#include <type_traits>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -50,7 +51,7 @@ namespace GL_ENGINE
 
 		uint32_t getGlDataType() const
 		{
-			return static_cast<std::underlying_type_t<ElementDataType>>(dataType);
+			return static_cast<uint32_t>(dataType);
 		}
 	};
 
@@ -86,13 +87,9 @@ namespace GL_ENGINE
 
 		virtual size_t getIndicesCount() const = 0;
 
-		virtual void bind(const glm::mat4 &viewProjection = glm::mat4(1.0f)) = 0;
+		virtual bool fillVertices(void* v_ptr, int &size) = 0;
 
-		virtual void unbind() = 0;
-
-		virtual void fillVertices(void* v_ptr, int &size) = 0;
-
-		virtual void fillIndices(void* v_ptr, int &offset, int &size) = 0;
+		virtual bool fillIndices(void* v_ptr, int &offset, int &size) = 0;
 
 		virtual const std::vector<VertexElement>& getVertexElements() = 0;
 

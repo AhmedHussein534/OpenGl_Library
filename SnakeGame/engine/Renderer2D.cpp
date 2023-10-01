@@ -67,6 +67,16 @@ namespace GL_ENGINE
         }
     }
 
+    void Renderer2D::drawIndexedAndFlush(const std::vector<VertexElement>& vertexElements)
+    {
+        drawElementsIndexed(vertexElements, indexDataSize / sizeof(uint32_t));
+        vOffset = 0;
+        iOffset = 0;
+        maxIndex = 0;
+        vertexDataSize = 0;
+        indexDataSize = 0;
+    }
+
     bool Renderer2D::drawScene()
     {
         bool ret = false;
@@ -77,12 +87,12 @@ namespace GL_ENGINE
             for (auto& v : elementMap)
             {
                 auto elementCount = v.second.size();
-                int vOffset = 0;
-                int iOffset = 0;
-                int maxIndex = 0;
-                size_t vertexDataSize = 0;
-                size_t indexDataSize = 0;
                 auto elements = v.second[0]->getVertexElements();
+                vOffset = 0;
+                iOffset = 0;
+                maxIndex = 0;
+                vertexDataSize = 0;
+                indexDataSize = 0;
 
                 if (elementCount > 0)
                 {
@@ -101,27 +111,32 @@ namespace GL_ENGINE
                     createAndBindShader(v.second[0]->getElementType(), shaderText.first, shaderText.second);
                     for (auto e : v.second)
                     {
-                        e->fillVertices(vertexCpuBuffer.get() + vOffset, vOffset);
-                        e->fillIndices(indexCpuBuffer.get() + iOffset, maxIndex, iOffset);
+                        bool dataFilled = true;
+                        dataFilled = e->fillVertices(vertexCpuBuffer.get() + vOffset, vOffset);
+                        dataFilled = dataFilled && e->fillIndices(indexCpuBuffer.get() + iOffset, maxIndex, iOffset);
                         vertexDataSize += vElementSize;
                         indexDataSize += iElementSize;
-                        if (((vertexDataSize + vElementSize) > vertexCpuBufferSize) ||
+                        if (!dataFilled)
+                        {
+                            drawIndexedAndFlush(elements);
+                            dataFilled = e->fillVertices(vertexCpuBuffer.get() + vOffset, vOffset);
+                            dataFilled = dataFilled && e->fillIndices(indexCpuBuffer.get() + iOffset, maxIndex, iOffset);
+                            vertexDataSize += vElementSize;
+                            indexDataSize += iElementSize;
+                            if (!dataFilled)
+                            {
+                                std::cout << "Error filling vertex and index buffers" << std::endl;
+                                return false;
+                            }
+                        }
+                        else if (((vertexDataSize + vElementSize) > vertexCpuBufferSize) ||
                             ((indexDataSize + iElementSize ) > indexCpuBufferSize))
                         {
-                            m_vertexBuffer->setData(vertexCpuBuffer.get(), vertexDataSize);
-                            m_indexBuffer->setData(indexCpuBuffer.get(), indexDataSize);
-                            drawElementsIndexed(elements, indexDataSize / sizeof(uint32_t));
-                            vOffset = 0;
-                            iOffset = 0;
-                            maxIndex = 0;
-                            vertexDataSize = 0;
-                            indexDataSize = 0;
+                            drawIndexedAndFlush(elements);
                             continue;
                         }
                     }
 
-                    m_vertexBuffer->setData(vertexCpuBuffer.get(), vertexDataSize);
-                    m_indexBuffer->setData(indexCpuBuffer.get(), indexDataSize);
                     drawElementsIndexed(elements, indexDataSize / sizeof(uint32_t));
                 }
             }
@@ -136,6 +151,8 @@ namespace GL_ENGINE
     {
         if (indexCount > 0)
         {
+            m_vertexBuffer->setData(vertexCpuBuffer.get(), vertexDataSize);
+            m_indexBuffer->setData(indexCpuBuffer.get(), indexDataSize);
             uint32_t index = 0;
             int offset = 0;
             for (const auto& element : vertexElements)

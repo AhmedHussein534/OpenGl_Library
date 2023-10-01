@@ -178,7 +178,6 @@ namespace GL_ENGINE
 
     std::shared_ptr<Texture3D> StbTexture3D::getTex()
     {
-        return texPtr;
     }
 
     StbTexture3D::~StbTexture3D()

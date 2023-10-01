@@ -32,7 +32,7 @@ namespace GL_ENGINE
         Renderer2D();
         void createAndBindShader(const ElementType &type, const std::string &vertexShaderText, const std::string &indexShaderText);
         void drawElementsIndexed(const std::vector<VertexElement>& vertexElements, uint32_t indexCount);
-
+        void drawIndexedAndFlush(const std::vector<VertexElement>& vertexElements);
 	private:
         bool sceneExists;
 		GL_ENGINE::ElementType currentShaderClass;
@@ -45,6 +45,12 @@ namespace GL_ENGINE
         std::unique_ptr<uint8_t[]> indexCpuBuffer;
         std::unique_ptr<VertexBuffer> m_vertexBuffer;
         std::unique_ptr<IndexBuffer> m_indexBuffer;
+
+        int vOffset = 0;
+        int iOffset = 0;
+        int maxIndex = 0;
+        size_t vertexDataSize = 0;
+        size_t indexDataSize = 0;
 
 	};
 }
