@@ -41,7 +41,6 @@ const float coordinateSize = 1000.0f;
 const float halfCoordinate = coordinateSize / 2.0f;
 const uint32_t wormLen = 4;
 const float wormPieceSize = 0.02f *  coordinateSize;// always make sure this is divisible by 2
-const float wormPieceVisible = wormPieceSize * 0.8f;
 const float startYPos = wormPieceSize / 2.0f;
 float fps = 6;
 MOVE_DIRECTION moveDirection = MOVE_DIRECTION::UP;
@@ -116,18 +115,18 @@ bool initBorders(std::array<std::shared_ptr<border>, borderCount> borders)
     std::array<float, borderCount> xCoordinates = {-halfCoordinate,
                                                    -halfCoordinate,
                                                    -halfCoordinate,
-                                                    halfCoordinate-wormPieceSize};
-    std::array<float, borderCount> yCoordinates = {-halfCoordinate+wormPieceSize,
+                                                    halfCoordinate-wormPieceSize/2.0f};
+    std::array<float, borderCount> yCoordinates = {-halfCoordinate+wormPieceSize/2.0f,
                                                     halfCoordinate,
                                                     halfCoordinate,
                                                     halfCoordinate};
     std::array<float, borderCount> length = {coordinateSize,
-                                             wormPieceSize,
+                                             wormPieceSize/2.0f,
                                              coordinateSize,
-                                             wormPieceSize};
-    std::array<float, borderCount> width = {wormPieceSize,
+                                             wormPieceSize/2.0f};
+    std::array<float, borderCount> width = {wormPieceSize/2.0f,
                                            coordinateSize,
-                                           wormPieceSize,
+                                           wormPieceSize/2.0f,
                                            coordinateSize};
     size_t currentBorder = 0;
     for (auto &it : borders)
