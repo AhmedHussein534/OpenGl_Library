@@ -7,7 +7,7 @@
 
 #include "external/stb_image/stb_image.hpp"
 
-#define TEX_SLOTS 16
+#define TEX_SLOTS 20
 
 namespace GL_ENGINE
 {
@@ -40,16 +40,16 @@ namespace GL_ENGINE
         bool getSlot(std::shared_ptr<TextureAsset> m_ptr, uint32_t &slot)
         {
             bool ret = true;
-            auto it = takenAssets.find(m_ptr);
+            auto it = takenAssets.find(m_ptr.get());
             if (it != takenAssets.end())
             {
-                slot = takenAssets[m_ptr];
+                slot = it->second;
             }
             else if (!m_list.empty())
             {
                 slot = m_list.back();
                 m_list.pop_back();
-                takenAssets[m_ptr] = slot;
+                takenAssets[m_ptr.get()] = slot;
             }
             else
             {
@@ -60,18 +60,19 @@ namespace GL_ENGINE
             return ret;
         }
 
-        bool giveSlot(std::shared_ptr<TextureAsset> m_ptr, uint32_t slot)
+        bool giveSlot(uint32_t slot)
         {
-            bool ret = true;
-            auto it = takenAssets.find(m_ptr);
-            if (it != takenAssets.end())
+            bool ret = false;
+            for (auto &it : takenAssets)
             {
-                takenAssets.erase(m_ptr);
-                m_list.push_back(slot);
-            }
-            else
-            {
-                std::cout << "Texture slot is not allocated: " << slot << std::endl;
+                if (it.second == slot)
+                {
+                    std::cout << "give slot: found slot = " << slot <<  std::endl;
+                    takenAssets.erase(it.first);
+                    m_list.push_back(slot);
+                    ret = true;
+                    break;
+                }
             }
 
             return ret;
@@ -84,7 +85,7 @@ namespace GL_ENGINE
         }
 
         std::list<uint32_t> m_list;
-        std::unordered_map<std::shared_ptr<TextureAsset>, uint32_t> takenAssets;
+        std::unordered_map<TextureAsset*, uint32_t> takenAssets;
     };
 
 
@@ -96,6 +97,11 @@ namespace GL_ENGINE
         bool bind();
 
         bool unbind();
+
+        uint32_t getActiveSlot()
+        {
+            return activeSlot;
+        }
 
         ~TextureAsset();
 
@@ -140,6 +146,6 @@ namespace GL_ENGINE
             }
 
         private:
-            StbTexture();
+            StbTexture() = default;
     };
 }

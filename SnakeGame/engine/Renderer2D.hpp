@@ -30,7 +30,7 @@ namespace GL_ENGINE
 
     private:
         Renderer2D();
-        void createAndBindShader(const ElementType &type, const std::string &vertexShaderText, const std::string &indexShaderText);
+        void createAndBindShader(std::shared_ptr<IElement> e, const std::string &vertexShaderText, const std::string &indexShaderText);
         void drawElementsIndexed(const std::vector<VertexElement>& vertexElements, uint32_t indexCount);
         void drawIndexedAndFlush(const std::vector<VertexElement>& vertexElements);
 	private:

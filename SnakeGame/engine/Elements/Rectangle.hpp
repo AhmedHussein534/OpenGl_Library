@@ -13,6 +13,11 @@ namespace GL_ENGINE
         Rectangle(float x, float y, float length, float width,
                 float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f, bool isDataNormalized = true);
 
+        virtual void setShaderData(Shader &shader, const glm::mat4& projectionView)
+        {
+            shader.setUniformValue("projectionview", 1, false, const_cast<float*>(glm::value_ptr(projectionView)));
+        }
+
         const std::vector<VertexElement>& getVertexElements() override;
 
         size_t getIndicesSize() const override;

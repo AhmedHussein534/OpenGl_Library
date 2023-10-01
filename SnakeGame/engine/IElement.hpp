@@ -79,6 +79,8 @@ namespace GL_ENGINE
 			return typeid(IElement);
 		}
 
+		virtual void setShaderData(Shader &shader, const glm::mat4& projectionView) = 0;
+
 		virtual ElementType getElementType() = 0;
 
 		virtual size_t getIndicesSize() const = 0;

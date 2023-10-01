@@ -13,7 +13,29 @@ namespace GL_ENGINE
     class Texture : public IElement
 	{
 	public:
-		Texture(std::shared_ptr<TextureAsset> texAsset, float x, float y, float length);
+		Texture(std::shared_ptr<TextureAsset> texAsset, float x, float y, float length, float width);
+
+		void setTexAsset(std::shared_ptr<TextureAsset> texAsset)
+		{
+			m_texAsset = texAsset;
+		}
+
+		std::shared_ptr<TextureAsset> getTexAsset()
+		{
+			return m_texAsset;
+		}
+
+		virtual void setShaderData(Shader &shader, const glm::mat4& projectionView)
+        {
+			int arr[32] = {};
+			for (int i = 0; i < 32; i++)
+			{
+				arr[i] = i;
+			}
+
+			shader.setUniformValue("u_Textures", static_cast<int*>(arr), static_cast<uint32_t>(32));
+			shader.setUniformValue("projectionview", 1, false, const_cast<float*>(glm::value_ptr(projectionView)));
+        }
 
 		const std::vector<VertexElement>& getVertexElements() override;
 
@@ -26,8 +48,6 @@ namespace GL_ENGINE
         std::pair<std::string, std::string> getShaderText() override;
 
 		virtual glm::vec3 getCenter() override;
-
-		~Texture();
 
 		virtual ElementType getElementType() override
         {
@@ -43,14 +63,15 @@ namespace GL_ENGINE
 
 		virtual bool fillIndices(void* v_ptr, int &offset, int &size) override;
 
+		~Texture() = default;
+
 	private:
-		uint32_t m_rendererId;
-		uint8_t* m_localBuffer;
-		uint32_t m_activeSlot;
 		float m_x;
 		float m_y;
 		float m_length;
+		float m_width;
 		glm::vec3 m_center;
 		std::vector<VertexElement> vertexElements;
+		std::shared_ptr<TextureAsset> m_texAsset;
 	};
 }

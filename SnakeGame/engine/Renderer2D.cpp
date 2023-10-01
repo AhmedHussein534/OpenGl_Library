@@ -52,8 +52,9 @@ namespace GL_ENGINE
         return m_camera;
     }
 
-    void Renderer2D::createAndBindShader(const ElementType &type, const std::string &vertexShaderText, const std::string &indexShaderText)
+    void Renderer2D::createAndBindShader(std::shared_ptr<IElement> e, const std::string &vertexShaderText, const std::string &indexShaderText)
     {
+        auto type = e->getElementType();
         if (type != currentShaderClass)
         {
             if (elementShaderMap.find(type) == elementShaderMap.end())
@@ -62,7 +63,7 @@ namespace GL_ENGINE
             }
 
             elementShaderMap[type]->bind();
-            elementShaderMap[type]->setUniformValue("projectionview", 1, false, const_cast<float*>(glm::value_ptr(m_camera->GetViewProjectionMatrix())));
+            e->setShaderData(*elementShaderMap[type], m_camera->GetViewProjectionMatrix());
             currentShaderClass = type;
         }
     }
@@ -108,7 +109,7 @@ namespace GL_ENGINE
                         break;
                     }
 
-                    createAndBindShader(v.second[0]->getElementType(), shaderText.first, shaderText.second);
+                    createAndBindShader(v.second[0], shaderText.first, shaderText.second);
                     for (auto e : v.second)
                     {
                         bool dataFilled = true;
@@ -167,6 +168,24 @@ namespace GL_ENGINE
                 offset += element.count * static_cast<int>(element.getDataSize());
                 index++;
             }
+
+            /*
+            std::cout << "DRAW CALL" << std::endl;
+            std::cout << "VertexBuffer: ";
+            for (int i = 0; i < vertexDataSize; i+=4)
+            {
+                float * data = reinterpret_cast<float*>(vertexCpuBuffer.get() + i);
+                std::cout << *data << " ";
+            }
+            std::cout << std::endl;
+            std::cout << "IndexBuffer: ";
+            for (int i = 0; i < indexDataSize; i+=4)
+            {
+                uint32_t* data = reinterpret_cast<uint32_t*>(indexCpuBuffer.get() + i);
+                std::cout << *data << " ";
+            }
+            std::cout << std::endl << std::endl;
+            */
 
             glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
         }

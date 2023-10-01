@@ -48,6 +48,12 @@ namespace GL_ENGINE
         {
             GLCall(glUniformMatrix4fv(location, count, transpose, mat));
         }
+
+        template<>
+        void setUniformValue(int location,  int *values, uint32_t count)
+        {
+            GLCall(glUniform1iv(location, count, values));
+        }
     }
 
     Shader::Shader(const std::string &vertexShader, const std::string &fragmentShader) : m_vertexShader(vertexShader),

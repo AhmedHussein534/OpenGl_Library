@@ -21,7 +21,6 @@ namespace GL_ENGINE
 
     bool TextureAsset::bind()
     {
-
         bool gotSlot = TexSlotManagement::getInterface().getSlot(shared_from_this(), activeSlot);
         if (!gotSlot)
         {
@@ -40,11 +39,14 @@ namespace GL_ENGINE
     {
         GLCall(glActiveTexture(GL_TEXTURE0 + activeSlot));
         GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+        activeSlot = 0;
         return true;
     }
 
     TextureAsset::~TextureAsset()
     {
+        unbind();
         GLCall(glDeleteTextures(1, &m_rendererId));
+        TexSlotManagement::getInterface().giveSlot(activeSlot);
     }
 }
