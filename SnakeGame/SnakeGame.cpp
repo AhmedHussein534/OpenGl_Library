@@ -209,7 +209,7 @@ glm::vec3 getDirectionUnitVector(MOVE_DIRECTION direction)
 
 std::shared_ptr<WindowsWindow> init()
 {
-    std::shared_ptr<WindowsWindow> window = std::make_shared<WindowsWindow>(WindowProps{"Mywindow", 1000, 1000});
+    std::shared_ptr<WindowsWindow> window = std::make_shared<WindowsWindow>(WindowProps{"Snake", 1000, 1000});
     GLenum err = glewInit();
     if (err != GLEW_OK)
     {
@@ -285,7 +285,33 @@ void initWorm(Worm &worm, AssetMap& assetMap)
         GL_ENGINE::Renderer2D::getRenderer().addElement(piece);
         currentXPiecePos += wormPieceSize;
     }
+}
 
+void initBackground()
+{
+    HZ_PROFILE_FUNCTION();
+    float red[2] = {170.0f/255.0f, 162.0f/255.0f};
+    float green[2] = {215.0f/255.0f, 209.0f/255.0f};
+    float blue[2] = {81.0f/255.0f, 73.0f/255.0f};
+
+    float currentXPos = -halfCoordinate;
+    float currentYPos = halfCoordinate;
+    int xColorIndex = 0;
+    while (currentXPos < halfCoordinate)
+    {
+        int yColorIndex = xColorIndex;
+        while(currentYPos > -halfCoordinate)
+        {
+            auto rect = std::make_shared<GL_ENGINE::Rectangle>(currentXPos, currentYPos, wormPieceSize, wormPieceSize, red[yColorIndex], green[yColorIndex], blue[yColorIndex], 1.0f); //only draw 80% of each size to leave gap
+            GL_ENGINE::Renderer2D::getRenderer().addElement(rect);
+            currentYPos -= wormPieceSize;
+            yColorIndex = (yColorIndex + 1) % 2;
+        }
+
+        currentYPos = halfCoordinate;
+        currentXPos += wormPieceSize;
+        xColorIndex = (xColorIndex + 1) % 2;
+    }
 }
 
 void moveWormPieceInDirection(std::shared_ptr<WormPiece> piece, float step = wormPieceSize, MOVE_DIRECTION direction = MOVE_DIRECTION::UP)
@@ -467,6 +493,7 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
         initAssets(texAssetsMap);
         auto step = wormPieceSize;
         GL_ENGINE::Renderer2D::getRenderer().beginScene(-halfCoordinate * aspectRatio, halfCoordinate * aspectRatio, -halfCoordinate, halfCoordinate);
+        initBackground();
         Worm worm = {};
         std::array<std::shared_ptr<border>, borderCount> borders = {};
         std::shared_ptr<WormPiece> food = createRandomFood(texAssetsMap);
