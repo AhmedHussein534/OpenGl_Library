@@ -10,28 +10,27 @@ namespace GL_ENGINE
 
     Renderer2D::Renderer2D() :  sceneExists(false),
                                 currentShaderClass(IElement::getDefaultElementId()),
-                                m_layout(nullptr),
                                 vertexCpuBuffer(nullptr),
                                 indexCpuBuffer(nullptr),
                                 m_vertexBuffer(nullptr),
                                 m_indexBuffer(nullptr)
     {
-
+        glEnable(GL_DEPTH_TEST);
     }
 
-    bool Renderer2D::addElement(std::shared_ptr<IElement> e)
+    bool Renderer2D::addElement(uint32_t layoutKey, std::shared_ptr<IElement> e)
     {
         bool ret = false;
         if (sceneExists)
         {
             auto key = e->getElementType();
-            if (elementMap.find(key) != elementMap.end())
+            if (elementMap[layoutKey].find(key) != elementMap[layoutKey].end())
             {
-                elementMap[key].push_back(e);
+                elementMap[layoutKey][key].push_back(e);
             }
             else
             {
-                elementMap[key] = std::vector<std::shared_ptr<IElement>>({e});
+                elementMap[layoutKey][key] = std::vector<std::shared_ptr<IElement>>({e});
             }
 
             ret = true;
@@ -42,7 +41,7 @@ namespace GL_ENGINE
 
     std::shared_ptr<OrthographicCamera> Renderer2D::beginScene(const float &left, const float &right, const float &bot, const float &top)
     {
-        m_layout = std::make_shared<Layout>();
+        m_layouts.clear();
         m_camera = std::make_shared<OrthographicCamera>(left, right, bot, top);
         vertexCpuBuffer = std::make_unique<uint8_t[]>(vertexCpuBufferSize);
         indexCpuBuffer = std::make_unique<uint8_t[]>(indexCpuBufferSize);
@@ -52,18 +51,18 @@ namespace GL_ENGINE
         return m_camera;
     }
 
-    void Renderer2D::createAndBindShader(std::shared_ptr<IElement> e, const std::string &vertexShaderText, const std::string &indexShaderText)
+    void Renderer2D::createAndBindShader(uint32_t layoutKey, std::shared_ptr<IElement> e, const std::string &vertexShaderText, const std::string &indexShaderText)
     {
         auto type = e->getElementType();
         if (type != currentShaderClass)
         {
-            if (elementShaderMap.find(type) == elementShaderMap.end())
+            if (elementShaderMap[layoutKey].find(type) == elementShaderMap[layoutKey].end())
             {
-                elementShaderMap[type] = std::make_shared<Shader>(vertexShaderText, indexShaderText);
+                elementShaderMap[layoutKey][type] = std::make_shared<Shader>(vertexShaderText, indexShaderText);
             }
 
-            elementShaderMap[type]->bind();
-            e->setShaderData(*elementShaderMap[type], m_camera->GetViewProjectionMatrix());
+            elementShaderMap[layoutKey][type]->bind();
+            e->setShaderData(*elementShaderMap[layoutKey][type], m_camera->GetViewProjectionMatrix());
             currentShaderClass = type;
         }
     }
@@ -84,63 +83,67 @@ namespace GL_ENGINE
         if (sceneExists)
         {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            m_layout->bind();
-            for (auto& v : elementMap)
+            for (uint32_t i = 0; i < m_layouts.size(); i++)
             {
-                auto elementCount = v.second.size();
-                auto elements = v.second[0]->getVertexElements();
-                vOffset = 0;
-                iOffset = 0;
-                maxIndex = 0;
-                vertexDataSize = 0;
-                indexDataSize = 0;
-
-                if (elementCount > 0)
+                m_layouts[i]->bind();
+                for (auto& v : elementMap[i])
                 {
-                    auto elementType = v.second[0]->getElementType();
-                    auto shaderText = v.second[0]->getShaderText();
-                    auto vElementSize = v.second[0]->getVerticesSize();
-                    auto iElementSize = v.second[0]->getIndicesSize();
-                    if ((vElementSize > vertexCpuBufferSize) || (iElementSize > indexCpuBufferSize))
-                    {
-                        std::cout << "ERROR: Renderer Buffers are not enough to render this element: "
-                                  << v.second[0]->getElementName()
-                                  << std::endl;
-                        break;
-                    }
+                    auto elementCount = v.second.size();
+                    auto elements = v.second[0]->getVertexElements();
+                    vOffset = 0;
+                    iOffset = 0;
+                    maxIndex = 0;
+                    vertexDataSize = 0;
+                    indexDataSize = 0;
 
-                    createAndBindShader(v.second[0], shaderText.first, shaderText.second);
-                    for (auto e : v.second)
+                    if (elementCount > 0)
                     {
-                        bool dataFilled = true;
-                        dataFilled = e->fillVertices(vertexCpuBuffer.get() + vOffset, vOffset);
-                        dataFilled = dataFilled && e->fillIndices(indexCpuBuffer.get() + iOffset, maxIndex, iOffset);
-                        vertexDataSize += vElementSize;
-                        indexDataSize += iElementSize;
-                        if (!dataFilled)
+                        auto elementType = v.second[0]->getElementType();
+                        auto shaderText = v.second[0]->getShaderText();
+                        auto vElementSize = v.second[0]->getVerticesSize();
+                        auto iElementSize = v.second[0]->getIndicesSize();
+                        if ((vElementSize > vertexCpuBufferSize) || (iElementSize > indexCpuBufferSize))
                         {
-                            drawIndexedAndFlush(elements);
+                            std::cout << "ERROR: Renderer Buffers are not enough to render this element: "
+                                    << v.second[0]->getElementName()
+                                    << std::endl;
+                            break;
+                        }
+
+                        createAndBindShader(i, v.second[0], shaderText.first, shaderText.second);
+                        for (auto e : v.second)
+                        {
+                            bool dataFilled = true;
                             dataFilled = e->fillVertices(vertexCpuBuffer.get() + vOffset, vOffset);
                             dataFilled = dataFilled && e->fillIndices(indexCpuBuffer.get() + iOffset, maxIndex, iOffset);
                             vertexDataSize += vElementSize;
                             indexDataSize += iElementSize;
                             if (!dataFilled)
                             {
-                                std::cout << "Error filling vertex and index buffers" << std::endl;
-                                return false;
+                                drawIndexedAndFlush(elements);
+                                dataFilled = e->fillVertices(vertexCpuBuffer.get() + vOffset, vOffset);
+                                dataFilled = dataFilled && e->fillIndices(indexCpuBuffer.get() + iOffset, maxIndex, iOffset);
+                                vertexDataSize += vElementSize;
+                                indexDataSize += iElementSize;
+                                if (!dataFilled)
+                                {
+                                    std::cout << "Error filling vertex and index buffers" << std::endl;
+                                    return false;
+                                }
+                            }
+                            else if (((vertexDataSize + vElementSize) > vertexCpuBufferSize) ||
+                                ((indexDataSize + iElementSize ) > indexCpuBufferSize))
+                            {
+                                drawIndexedAndFlush(elements);
+                                continue;
                             }
                         }
-                        else if (((vertexDataSize + vElementSize) > vertexCpuBufferSize) ||
-                            ((indexDataSize + iElementSize ) > indexCpuBufferSize))
-                        {
-                            drawIndexedAndFlush(elements);
-                            continue;
-                        }
-                    }
 
-                    drawElementsIndexed(elements, indexDataSize / sizeof(uint32_t));
+                        drawElementsIndexed(elements, indexDataSize / sizeof(uint32_t));
+                    }
                 }
             }
+
 
             ret = true;
         }
@@ -164,7 +167,7 @@ namespace GL_ENGINE
                     element.getGlDataType() /* type of vertex data (float) */,
                     (element.normalized ? GL_FALSE : GL_TRUE)/* data is already normalized so false for normalization */,
                     element.stride /* stride i.e how many bytes to increment to move to next vertex */,
-                    (const void*) offset);
+                    reinterpret_cast<const void*>(offset));
                 offset += element.count * static_cast<int>(element.getDataSize());
                 index++;
             }
@@ -194,12 +197,13 @@ namespace GL_ENGINE
     void Renderer2D::endScene()
     {
         sceneExists = false;
-		m_layout = nullptr;
+
         m_camera = nullptr;
         vertexCpuBuffer = nullptr;
         indexCpuBuffer = nullptr;
         m_vertexBuffer = nullptr;
         m_indexBuffer = nullptr;
+        m_layouts.clear();
         elementMap.clear();
         elementShaderMap.clear();
         currentShaderClass = IElement::getDefaultElementId();

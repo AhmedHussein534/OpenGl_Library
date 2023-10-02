@@ -44,16 +44,17 @@ namespace
 
 namespace GL_ENGINE
 {
-    Rectangle::Rectangle(float x, float y, float length, float width,
+    Rectangle::Rectangle(float x, float y, float z, float length, float width,
         float r, float g, float b, float a, bool isDataNormalized) :  m_x(x),
-                                                                    m_y(y),
-                                                                    m_length(length),
-                                                                    m_width(width),
-                                                                    m_r(r),
-                                                                    m_g(g),
-                                                                    m_b(b),
-                                                                    m_a(a),
-                                                                    m_center(x+length/2.0f,y-width/2.0f,0.0f)
+                                                                      m_y(y),
+                                                                      m_z(z),
+                                                                      m_length(length),
+                                                                      m_width(width),
+                                                                      m_r(r),
+                                                                      m_g(g),
+                                                                      m_b(b),
+                                                                      m_a(a),
+                                                                      m_center(x+length/2.0f,y-width/2.0f,0.0f)
     {
         std::shared_ptr<std::vector<float>> vertexData = std::make_shared<std::vector<float>>(std::initializer_list<float>({
                                                             (m_x)           ,     (m_y),
@@ -89,22 +90,22 @@ namespace GL_ENGINE
     bool Rectangle::fillVertices(void* v_ptr, int &size)
     {
         RectangleVertex* vertex = reinterpret_cast<RectangleVertex*>(v_ptr);
-        vertex->pos = *m_model * glm::vec4{m_x, m_y, 0.0f, 1.0f};
+        vertex->pos = *m_model * glm::vec4{m_x, m_y, m_z, 1.0f};
         vertex->color = glm::vec4{m_r, m_g, m_b, m_a};
         size += sizeof(RectangleVertex);
 
         vertex++;
-        vertex->pos = *m_model * glm::vec4{m_x + m_length, m_y, 0.0f, 1.0f};
+        vertex->pos = *m_model * glm::vec4{m_x + m_length, m_y, m_z, 1.0f};
         vertex->color = glm::vec4{m_r, m_g, m_b, m_a};
         size += sizeof(RectangleVertex);
 
         vertex++;
-        vertex->pos = *m_model * glm::vec4{m_x + m_length, m_y - m_width, 0.0f, 1.0f};
+        vertex->pos = *m_model * glm::vec4{m_x + m_length, m_y - m_width, m_z, 1.0f};
         vertex->color = glm::vec4{m_r, m_g, m_b, m_a};
         size += sizeof(RectangleVertex);
 
         vertex++;
-        vertex->pos = *m_model * glm::vec4{m_x, m_y - m_width, 0.0f, 1.0f};
+        vertex->pos = *m_model * glm::vec4{m_x, m_y - m_width, m_z, 1.0f};
         vertex->color = glm::vec4{m_r, m_g, m_b, m_a};
         size += sizeof(RectangleVertex);
         return true;

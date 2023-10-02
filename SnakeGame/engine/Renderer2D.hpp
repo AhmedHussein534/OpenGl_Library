@@ -22,7 +22,15 @@ namespace GL_ENGINE
 
         std::shared_ptr<OrthographicCamera> beginScene(const float &left, const float &right, const float &bot, const float &top);
 
-		bool addElement(std::shared_ptr<IElement> e);
+        uint32_t createLayout()
+        {
+            m_layouts.push_back(std::make_shared<Layout>());
+            elementMap.push_back({});
+            elementShaderMap.push_back({});
+            return static_cast<uint32_t>(m_layouts.size() - 1);
+        }
+
+		bool addElement(uint32_t layoutKey, std::shared_ptr<IElement> e);
 
 		bool drawScene();
 
@@ -30,15 +38,15 @@ namespace GL_ENGINE
 
     private:
         Renderer2D();
-        void createAndBindShader(std::shared_ptr<IElement> e, const std::string &vertexShaderText, const std::string &indexShaderText);
+        void createAndBindShader(uint32_t layoutKey, std::shared_ptr<IElement> e, const std::string &vertexShaderText, const std::string &indexShaderText);
         void drawElementsIndexed(const std::vector<VertexElement>& vertexElements, uint32_t indexCount);
         void drawIndexedAndFlush(const std::vector<VertexElement>& vertexElements);
 	private:
         bool sceneExists;
 		GL_ENGINE::ElementType currentShaderClass;
-		std::unordered_map<GL_ENGINE::ElementType, std::vector<std::shared_ptr<IElement>>> elementMap;
-        std::unordered_map<GL_ENGINE::ElementType, std::shared_ptr<Shader>> elementShaderMap;
-		std::shared_ptr<Layout> m_layout;
+		std::vector<std::unordered_map<GL_ENGINE::ElementType, std::vector<std::shared_ptr<IElement>>>> elementMap;
+        std::vector<std::unordered_map<GL_ENGINE::ElementType, std::shared_ptr<Shader>>> elementShaderMap;
+		std::vector<std::shared_ptr<Layout>> m_layouts;
         std::shared_ptr<OrthographicCamera> m_camera;
 
         std::unique_ptr<uint8_t[]> vertexCpuBuffer;

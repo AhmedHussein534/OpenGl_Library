@@ -10,7 +10,7 @@ namespace GL_ENGINE
     class Rectangle : public IElement
     {
     public:
-        Rectangle(float x, float y, float length, float width,
+        Rectangle(float x, float y, float z, float length, float width,
                 float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f, bool isDataNormalized = true);
 
         virtual void setShaderData(Shader &shader, const glm::mat4& projectionView)
@@ -59,6 +59,7 @@ namespace GL_ENGINE
     private:
         float m_x;
         float m_y;
+        float m_z;
         float m_length;
         float m_width;
         float m_r;

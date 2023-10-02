@@ -40,7 +40,7 @@ bool shouldClose = false;
 const float coordinateSize = 1000.0f;
 const float halfCoordinate = coordinateSize / 2.0f;
 const uint32_t wormLen = 4;
-const float wormPieceSize = 0.03f *  coordinateSize;// always make sure this is divisible by 2
+const float wormPieceSize = 0.04f *  coordinateSize;// always make sure this is divisible by 2
 const float startYPos = wormPieceSize / 2.0f;
 float fps = 6;
 MOVE_DIRECTION moveDirection = MOVE_DIRECTION::UP;
@@ -103,36 +103,34 @@ std::shared_ptr<GL_ENGINE::TextureAsset> getAsset(AssetMap &texAssetsMap, const 
         std::cout << "Error: asset is not in map: " << name << std::endl;
         assert(0);
     }
-    else
-    {
-        return pair->second;
-    }
+
+    return pair->second;
 }
 
-bool initBorders(std::array<std::shared_ptr<border>, borderCount> borders)
+bool initBorders(uint32_t backgroundLayoutKey, std::array<std::shared_ptr<border>, borderCount> borders)
 {
     HZ_PROFILE_FUNCTION();
     std::array<float, borderCount> xCoordinates = {-halfCoordinate,
                                                    -halfCoordinate,
                                                    -halfCoordinate,
-                                                    halfCoordinate-wormPieceSize/2.0f};
-    std::array<float, borderCount> yCoordinates = {-halfCoordinate+wormPieceSize/2.0f,
+                                                    halfCoordinate-wormPieceSize};
+    std::array<float, borderCount> yCoordinates = {-halfCoordinate+wormPieceSize,
                                                     halfCoordinate,
                                                     halfCoordinate,
                                                     halfCoordinate};
     std::array<float, borderCount> length = {coordinateSize,
-                                             wormPieceSize/2.0f,
+                                             wormPieceSize,
                                              coordinateSize,
-                                             wormPieceSize/2.0f};
-    std::array<float, borderCount> width = {wormPieceSize/2.0f,
+                                             wormPieceSize};
+    std::array<float, borderCount> width = {wormPieceSize,
                                            coordinateSize,
-                                           wormPieceSize/2.0f,
+                                           wormPieceSize,
                                            coordinateSize};
     size_t currentBorder = 0;
     for (auto &it : borders)
     {
-        it = std::make_shared<border>(xCoordinates[currentBorder], yCoordinates[currentBorder], length[currentBorder], width[currentBorder], 0.34f, 0.54f, 0.20f, 1.0f);
-        GL_ENGINE::Renderer2D::getRenderer().addElement(it);
+        it = std::make_shared<border>(xCoordinates[currentBorder], yCoordinates[currentBorder], -0.4f, length[currentBorder], width[currentBorder], 0.34f, 0.54f, 0.20f, 1.0f);
+        GL_ENGINE::Renderer2D::getRenderer().addElement(backgroundLayoutKey, it);
         currentBorder++;
     }
 
@@ -274,7 +272,7 @@ void onEvent(Event& e)
 }
 
 
-void initWorm(Worm &worm, AssetMap& assetMap)
+void initWorm(uint32_t wormLayoutKey, Worm &worm, AssetMap& assetMap)
 {
     HZ_PROFILE_FUNCTION();
     float currentXPiecePos = 0.0f - (wormPieceSize / 2.0f);
@@ -282,12 +280,12 @@ void initWorm(Worm &worm, AssetMap& assetMap)
     {
         auto piece = std::make_shared<WormPiece>(getAsset(assetMap, "head_down"), currentXPiecePos, startYPos, wormPieceSize, wormPieceSize); //only draw 80% of each size to leave gap
         worm.push_back(piece);
-        GL_ENGINE::Renderer2D::getRenderer().addElement(piece);
+        GL_ENGINE::Renderer2D::getRenderer().addElement(wormLayoutKey, piece);
         currentXPiecePos += wormPieceSize;
     }
 }
 
-void initBackground()
+void initBackground(uint32_t backgroundLayoutKey)
 {
     HZ_PROFILE_FUNCTION();
     float red[2] = {170.0f/255.0f, 162.0f/255.0f};
@@ -302,8 +300,8 @@ void initBackground()
         int yColorIndex = xColorIndex;
         while(currentYPos > -halfCoordinate)
         {
-            auto rect = std::make_shared<GL_ENGINE::Rectangle>(currentXPos, currentYPos, wormPieceSize, wormPieceSize, red[yColorIndex], green[yColorIndex], blue[yColorIndex], 1.0f); //only draw 80% of each size to leave gap
-            GL_ENGINE::Renderer2D::getRenderer().addElement(rect);
+            auto rect = std::make_shared<GL_ENGINE::Rectangle>(currentXPos, currentYPos, -0.5f, wormPieceSize, wormPieceSize, red[yColorIndex], green[yColorIndex], blue[yColorIndex], 1.0f); //only draw 80% of each size to leave gap
+            GL_ENGINE::Renderer2D::getRenderer().addElement(backgroundLayoutKey, rect);
             currentYPos -= wormPieceSize;
             yColorIndex = (yColorIndex + 1) % 2;
         }
@@ -448,7 +446,7 @@ void moveWorm(AssetMap &assetMap, Worm &worm, float step = wormPieceSize, MOVE_D
 
 }
 
-std::shared_ptr<WormPiece> createRandomFood(AssetMap &assetMap)
+std::shared_ptr<WormPiece> createRandomFood(uint32_t wormLayout, AssetMap &assetMap)
 {
     HZ_PROFILE_FUNCTION();
     float align = wormPieceSize;
@@ -458,7 +456,7 @@ std::shared_ptr<WormPiece> createRandomFood(AssetMap &assetMap)
     float x = static_cast<float>(static_cast<int>(distribution(gen) / align)) * align;
     float y = static_cast<float>(static_cast<int>(distribution(gen) / align)) * align;
     auto foodShared = std::make_shared<WormPiece>(getAsset(assetMap, "apple"), x - wormPieceSize / 2.0f, y + wormPieceSize / 2.0f, wormPieceSize, wormPieceSize);
-    GL_ENGINE::Renderer2D::getRenderer().addElement(foodShared);
+    GL_ENGINE::Renderer2D::getRenderer().addElement(wormLayout, foodShared);
     return foodShared;
 }
 
@@ -488,19 +486,22 @@ bool isWormSelfCollided(Worm &worm)
 void executeGame(std::shared_ptr<WindowsWindow> window)
 {
     {
+
         GL_ENGINE::Timestep time;
         AssetMap texAssetsMap;
         initAssets(texAssetsMap);
         auto step = wormPieceSize;
+
         GL_ENGINE::Renderer2D::getRenderer().beginScene(-halfCoordinate * aspectRatio, halfCoordinate * aspectRatio, -halfCoordinate, halfCoordinate);
-        initBackground();
+        auto backgroundLayoutKey = GL_ENGINE::Renderer2D::getRenderer().createLayout();
+        auto wormLayoutKey = GL_ENGINE::Renderer2D::getRenderer().createLayout();
+        initBackground(backgroundLayoutKey);
         Worm worm = {};
         std::array<std::shared_ptr<border>, borderCount> borders = {};
-        std::shared_ptr<WormPiece> food = createRandomFood(texAssetsMap);
+        std::shared_ptr<WormPiece> food = createRandomFood(wormLayoutKey, texAssetsMap);
+        initWorm(wormLayoutKey, worm, texAssetsMap);
+        initBorders(backgroundLayoutKey, borders);
 
-
-        initWorm(worm, texAssetsMap);
-        initBorders(borders);
         std::cout << "Score: 0" << std::endl;
         float deltaTime = 1000.0f / fps;
         float sleepTime = 0.1f * deltaTime;
@@ -524,7 +525,7 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
                     std::cout << "Worm has eaten" << std::endl;
                     moveWormPieceInDirection(food, step, moveDirection);
                     worm.push_back(food);
-                    food = createRandomFood(texAssetsMap);
+                    food = createRandomFood(wormLayoutKey, texAssetsMap);
                     if (worm.size() % 5 == 0)
                     {
                         fps = fps * 1.1f;

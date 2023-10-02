@@ -130,8 +130,6 @@ namespace GL_ENGINE
         shader->setUniformValue("model", 1, false, const_cast<float*>(glm::value_ptr(*m_model)));
         GLCall(glActiveTexture(GL_TEXTURE0 + m_activeSlot));
         GLCall(glBindTexture(GL_TEXTURE_2D, m_rendererId));
-        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        GLCall(glEnable(GL_BLEND));
     }
 
     void Texture3D::unbind()
