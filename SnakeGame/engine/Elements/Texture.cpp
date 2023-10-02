@@ -13,25 +13,29 @@ namespace
 		"layout(location = 0) in vec4 position;\n"
 		"layout(location = 1) in vec2 texCoord;\n"
 		"layout(location = 2) in float texIndex;\n"
+		"layout(location = 3) in float tilingEffect;\n"
 		"out vec2 v_TexCoord;\n"
 		"out float v_TexIndex;\n"
+		"out float v_tilingEffect;\n"
 		"uniform mat4 projectionview;\n"
 		"void main()\n"
 		"{\n"
 		"    gl_Position = projectionview * position;\n"
 		"    v_TexCoord = texCoord;\n"
 		"    v_TexIndex = texIndex;\n"
+		"    v_tilingEffect = tilingEffect;\n"
 		"}\n";
 
 	const std::string fragmentShader =
 		"#version 330 core\n"
 		"layout(location = 0) out vec4 color;\n"
-		"in vec2 v_TexCoord;\n"
+		"in  vec2 v_TexCoord;\n"
 		"in float v_TexIndex;\n"
+		"in float v_tilingEffect;\n"
 		"uniform sampler2D u_Textures[32];\n"
 		"void main()\n"
 		"{\n"
-		"    color = texture(u_Textures[int(v_TexIndex)], v_TexCoord);\n"
+		"    color = texture(u_Textures[int(v_TexIndex)], v_TexCoord * v_tilingEffect);\n"
 		"}\n";
 
 	struct TextureVertex
@@ -39,6 +43,7 @@ namespace
         glm::vec4 pos;
         glm::vec2 texCoord;
 		float slot;
+		float tiling;
     };
 
     struct TextureIndex
@@ -50,16 +55,18 @@ namespace
 
 namespace GL_ENGINE
 {
-	Texture::Texture(std::shared_ptr<TextureAsset> texAsset, float x, float y, float length, float width) : m_x(x),
-	                                                                                           m_y(y),
-																							   m_length(length),
-																							   m_width(width),
-																				               m_center(x+length/2.0f,y-width/2.0f,0.0f),
-																							   m_texAsset(texAsset)
+	Texture::Texture(std::shared_ptr<TextureAsset> texAsset, float x, float y, float length, float width, float tiling) : m_x(x),
+																														  m_y(y),
+																														  m_length(length),
+																														  m_width(width),
+																														  m_tiling(tiling),
+																														  m_center(x+length/2.0f,y-width/2.0f,0.0f),
+																														  m_texAsset(texAsset)
 	{
-		vertexElements.emplace_back(4, ElementDataType::FLOAT, true, 7 * sizeof(float));
-		vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 7 * sizeof(float));
-		vertexElements.emplace_back(1, ElementDataType::FLOAT, true, 7 * sizeof(float));
+		vertexElements.emplace_back(4, ElementDataType::FLOAT, true, 8 * sizeof(float));
+		vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 8 * sizeof(float));
+		vertexElements.emplace_back(1, ElementDataType::FLOAT, true, 8 * sizeof(float));
+		vertexElements.emplace_back(1, ElementDataType::FLOAT, true, 8 * sizeof(float));
 	}
 
 	std::pair<std::string, std::string> Texture::getShaderText()
@@ -107,24 +114,28 @@ namespace GL_ENGINE
         vertex->pos = *m_model * glm::vec4{m_x, m_y - m_width, 0.0f, 1.0f};
         vertex->texCoord = glm::vec2{0.0f, 0.0f};
 		vertex->slot = slot;
+		vertex->tiling = m_tiling;
         size += sizeof(TextureVertex);
         vertex++;
 
         vertex->pos = *m_model * glm::vec4{m_x + m_length, m_y - m_width, 0.0f, 1.0f};
         vertex->texCoord = glm::vec2{1.0f, 0.0f};
 		vertex->slot = slot;
+		vertex->tiling = m_tiling;
         size += sizeof(TextureVertex);
         vertex++;
 
 		vertex->pos = *m_model * glm::vec4{m_x + m_length, m_y, 0.0f, 1.0f};
         vertex->texCoord = glm::vec2{1.0f, 1.0f};
 		vertex->slot = slot;
+		vertex->tiling = m_tiling;
         size += sizeof(TextureVertex);
         vertex++;
 
 		vertex->pos = *m_model * glm::vec4{m_x, m_y, 0.0f, 1.0f};
         vertex->texCoord = glm::vec2{0.0f, 1.0f};
 		vertex->slot = slot;
+		vertex->tiling = m_tiling;
         size += sizeof(TextureVertex);
         vertex++;
 		return true;
