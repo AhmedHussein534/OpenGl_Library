@@ -511,19 +511,22 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
             if (delta >= deltaTime - sleepTime)
             {
                 time.notifyUpdate();
-
-                moveWorm(texAssetsMap, worm, step, moveDirection);
-
                 if (isWormSelfCollided(worm) || isPieceOutside(worm.back()))
                 {
                     std::cout << "Game over" << std::endl;
                     break;
                 }
-
-                if (isTwoPiecesCollided(worm.back(), food))
+                else if (isTwoPiecesCollided(worm.back(), food))
                 {
                     std::cout << "Worm has eaten" << std::endl;
+
+                    auto headItr = worm.rbegin();
+                    auto prevHead = *(headItr);
+                    headItr++;
+                    auto beforePrevHead = *(headItr);
                     moveWormPieceInDirection(food, step, moveDirection);
+                    assignAssetToHead(texAssetsMap, food, moveDirection);
+                    assignAssetToBody(texAssetsMap, beforePrevHead, prevHead, food);
                     worm.push_back(food);
                     food = createRandomFood(wormLayoutKey, texAssetsMap);
                     if (worm.size() % 5 == 0)
@@ -534,6 +537,10 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
                     }
 
                     std::cout << "Score: " << worm.size() - wormLen << std::endl;
+                }
+                else
+                {
+                    moveWorm(texAssetsMap, worm, step, moveDirection);
                 }
 
                 if (!shouldClose)
