@@ -503,8 +503,9 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
         initBorders(backgroundLayoutKey, borders);
 
         std::cout << "Score: 0" << std::endl;
+        const float sleepToDelta = 0.05f;
         float deltaTime = 1000.0f / fps;
-        float sleepTime = 0.1f * deltaTime;
+        float sleepTime = sleepToDelta * deltaTime;
         while (!shouldClose)
         {
             auto delta = time.getDelta<std::milli>();
@@ -533,7 +534,7 @@ void executeGame(std::shared_ptr<WindowsWindow> window)
                     {
                         fps = fps * 1.1f;
                         deltaTime = 1000.0f / fps;
-                        sleepTime = 0.1f * deltaTime;
+                        sleepTime = sleepToDelta * deltaTime;
                     }
 
                     std::cout << "Score: " << worm.size() - wormLen << std::endl;
