@@ -28,6 +28,8 @@ message("${CMAKE_BINARY_DIR}/SnakeGame/external/glfw/src/")
 # Add source to this project's executable.
 add_executable (SnakeGame
                 "SnakeGame.cpp"
+				"Application.cpp"
+				"main.cpp"
 				"engine/Renderer.cpp"
 				"engine/VertexBuffer.cpp"
 				"engine/IndexBuffer.cpp"
@@ -38,8 +40,6 @@ add_executable (SnakeGame
 				"engine/Elements/Rectangle.cpp"
 			    "engine/Elements/Texture.cpp"
 				"engine/Elements/TextureAsset.cpp"
-				# "engine/Elements/Texture3D.cpp"
-				# "engine/Elements/Cube.cpp"
 				"engine/Cameras/OrthographicCamera.cpp"
 				"engine/Cameras/PerspectiveCamera.cpp"
 				"external/stb_image/stb_image.cpp"
