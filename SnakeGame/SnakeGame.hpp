@@ -22,7 +22,7 @@ namespace SnakeGame
         LEFT,
     };
 
-    constexpr float coordinateSize = 1000.0f;
+    constexpr uint32_t coordinateSize = 1000;
     constexpr float halfCoordinate = coordinateSize / 2.0f;
     constexpr float wormPieceSize = 0.04f *  coordinateSize;// always make sure this is divisible by 2
     constexpr float step = wormPieceSize;
@@ -35,7 +35,9 @@ namespace SnakeGame
         public:
         SnakeGame();
 
+
         private:
+        void startGame();
         std::string to_string(MOVE_DIRECTION direction);
         bool initAssets();
         std::shared_ptr<GL_ENGINE::TextureAsset> getAsset(const std::string &name);

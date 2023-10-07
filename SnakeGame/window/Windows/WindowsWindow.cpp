@@ -58,6 +58,14 @@ void WindowsWindow::Init(const WindowProps& props)
         data.EventCallback(event);
     });
 
+
+    glfwSetWindowFocusCallback(m_Window, [](GLFWwindow* window, int focused)
+    {
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+        WindowFocusEvent event(focused == GLFW_TRUE);
+        data.EventCallback(event);
+    });
+
     glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
     {
         WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);

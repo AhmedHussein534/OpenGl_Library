@@ -18,7 +18,7 @@
 enum class EventType
 {
     None = 0,
-    WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
+    WindowClose, WindowResize, WindowFocus, WindowMoved,
     AppTick, AppUpdate, AppRender,
     KeyPressed, KeyReleased, KeyTyped,
     MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
@@ -117,7 +117,7 @@ public:
     EVENT_CLASS_TYPE(KeyTyped)
 };
 
-class WindowResizeEvent : public Event
+	class WindowResizeEvent : public Event
 	{
 	public:
 		WindowResizeEvent(unsigned int width, unsigned int height)
@@ -137,6 +137,33 @@ class WindowResizeEvent : public Event
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	private:
 		unsigned int m_Width, m_Height;
+	};
+
+	class WindowFocusEvent : public Event
+	{
+	public:
+		WindowFocusEvent(bool focus)
+			: m_focus(focus)
+		{
+
+		}
+
+		bool isFocused() const
+		{
+			return m_focus;
+		}
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "WindowFocusEvent: " << (m_focus? "Focused" : "Not Focused");
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(WindowFocus)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+	private:
+		bool m_focus;
 	};
 
 	class WindowCloseEvent : public Event

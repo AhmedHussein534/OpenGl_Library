@@ -28,21 +28,35 @@ namespace GL_ENGINE
 
         virtual bool onCloseTriggered(const WindowCloseEvent &e) = 0;
 
+        bool onWindowResize(const WindowResizeEvent &e);
+
+        bool onFocusChange(const WindowFocusEvent &e);
+
         void mainloop();
 
         void onEvent(Event& e);
 
         void updateFps(float fps);
 
+        void resetFps();
+
         float getFps();
 
         private:
-        void init(const std::string &appName, uint32_t length, uint32_t width);
+        void init();
+
+        void recalculateDelta();
 
 
         protected:
         bool m_gameRunning = true;
         bool loopRunning = true;
+        bool isMinimized = false;
+        bool isFocused = true;
+        std::string m_appName;
+        uint32_t m_length;
+        uint32_t m_width;
+
 
         private:
         const float sleepToDelta = 0.05f;

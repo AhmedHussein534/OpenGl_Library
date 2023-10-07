@@ -7,9 +7,12 @@
 
 namespace GL_ENGINE
 {
-    Application::Application(const std::string &appName, uint32_t length, uint32_t width)
+    Application::Application(const std::string &appName, uint32_t length, uint32_t width) : m_appName(appName),
+                                                                                            m_length(length),
+                                                                                            m_width(width)
+
     {
-        init(appName, length, width);
+        init();
         EventDispatcher::getInstance().subscribeToEvents(EventCategoryKeyboard | EventCategoryApplication,
                                                          std::bind(&Application::onEvent, this, std::placeholders::_1));
     }
@@ -20,10 +23,11 @@ namespace GL_ENGINE
         while(loopRunning)
         {
             auto delta = time.getDelta<std::milli>();
-            if (delta >= deltaTime_ms - sleepTime_ms)
+            float isDeltaTime = delta >= deltaTime_ms - sleepTime_ms;
+            if (isDeltaTime)
             {
                 time.notifyUpdate();
-                if (m_gameRunning)
+                if (m_gameRunning && isFocused && !isMinimized)
                 {
                     onDeltaStep();
                 }
@@ -31,7 +35,7 @@ namespace GL_ENGINE
                 window->OnUpdate();
             }
 
-            Sleep(sleepTime_ms);
+            Sleep(static_cast<DWORD>(sleepTime_ms));
         }
     }
 
@@ -39,13 +43,15 @@ namespace GL_ENGINE
     {
         EventDispatcher::getInstance().Dispatch<KeyReleasedEvent>(e, std::bind(&Application::onKeyReleased, this, std::placeholders::_1));
         EventDispatcher::getInstance().Dispatch<WindowCloseEvent>(e, std::bind(&Application::onCloseTriggered, this, std::placeholders::_1));
+        EventDispatcher::getInstance().Dispatch<WindowResizeEvent>(e, std::bind(&Application::onWindowResize, this, std::placeholders::_1));
+        EventDispatcher::getInstance().Dispatch<WindowFocusEvent>(e, std::bind(&Application::onFocusChange, this, std::placeholders::_1));
     }
 
 
 
-    void Application::init(const std::string &appName, uint32_t length, uint32_t width)
+    void Application::init()
     {
-        window = std::make_shared<WindowsWindow>(WindowProps{appName, length, width});
+        window = std::make_shared<WindowsWindow>(WindowProps{m_appName, m_length, m_width});
         if (!window)
         {
             std::cout << "ERROR: failed to create window" << std::endl;
@@ -62,15 +68,42 @@ namespace GL_ENGINE
         }
     }
 
+    void Application::recalculateDelta()
+    {
+        deltaTime_ms = 1000.0f / m_fps;
+        sleepTime_ms = sleepToDelta * deltaTime_ms;
+    }
+
+
     void Application::updateFps(float fps)
     {
         m_fps = fps;
-        deltaTime_ms = 1000.0f / m_fps;
-        sleepTime_ms = sleepToDelta * deltaTime_ms;
+        recalculateDelta();
     }
 
     float Application::getFps()
     {
         return m_fps;
+    }
+
+    void Application::resetFps()
+    {
+        m_fps = 6;
+        recalculateDelta();
+    }
+
+    bool Application::onWindowResize(const WindowResizeEvent &e)
+    {
+        m_width = e.GetHeight();
+        m_length = e.GetWidth();
+        isMinimized = ((m_width == 0) && (m_length == 0));
+        return true;
+    }
+
+    bool Application::onFocusChange(const WindowFocusEvent &e)
+    {
+        std::cout << e.ToString() << std::endl;
+        isFocused = e.isFocused();
+        return true;
     }
 };

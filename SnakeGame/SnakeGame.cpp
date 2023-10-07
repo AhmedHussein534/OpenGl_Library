@@ -18,8 +18,13 @@ namespace SnakeGame
                              moveDirection(MOVE_DIRECTION::UP),
                              lastMoveDirection(MOVE_DIRECTION::UP)
     {
-        float aspectRatio = 1.0f;
         initAssets();
+        startGame();
+    }
+
+    void SnakeGame::startGame()
+    {
+        float aspectRatio = 1.0f;
         Worm worm = {};
         GL_ENGINE::Renderer2D::getRenderer().beginScene(-halfCoordinate * aspectRatio, halfCoordinate * aspectRatio, -halfCoordinate, halfCoordinate);
         backgroundLayoutKey = GL_ENGINE::Renderer2D::getRenderer().createLayout();
@@ -202,6 +207,13 @@ namespace SnakeGame
 
     bool SnakeGame::onKeyReleased(const KeyReleasedEvent &e)
     {
+        if (!m_gameRunning)
+        {
+            resetFps();
+            startGame();
+            m_gameRunning = true;
+        }
+
         switch (e.GetKeyCode())
         {
             case Key::Up:
@@ -414,7 +426,7 @@ namespace SnakeGame
     {
         HZ_PROFILE_FUNCTION();
         float align = wormPieceSize;
-        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        uint32_t seed = static_cast<uint32_t>(std::chrono::system_clock::now().time_since_epoch().count());
         std::default_random_engine gen(seed);
         std::uniform_real_distribution<float> distribution(-halfCoordinate + wormPieceSize, halfCoordinate - wormPieceSize);
         float x = static_cast<float>(static_cast<int>(distribution(gen) / align)) * align;
@@ -451,7 +463,7 @@ namespace SnakeGame
     {
         if (isWormSelfCollided() || isPieceOutside(worm.back()))
         {
-            std::cout << "Game over" << std::endl;
+            std::cout << "Game over" << std::endl << std::endl;
             borders = {};
             worm.clear();
             food = nullptr;
