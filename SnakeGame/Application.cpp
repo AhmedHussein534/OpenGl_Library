@@ -7,11 +7,11 @@
 
 namespace GL_ENGINE
 {
-    Application::Application(const std::string &appName, int length, int width)
+    Application::Application(const std::string &appName, uint32_t length, uint32_t width)
     {
         init(appName, length, width);
         EventDispatcher::getInstance().subscribeToEvents(EventCategoryKeyboard | EventCategoryApplication,
-                                                         std::bind(onEvent, this, std::placeholders::_1));
+                                                         std::bind(&Application::onEvent, this, std::placeholders::_1));
     }
 
     void Application::mainloop()
@@ -37,13 +37,13 @@ namespace GL_ENGINE
 
     void Application::onEvent(Event& e)
     {
-        EventDispatcher::getInstance().Dispatch<KeyReleasedEvent>(e, std::bind(onKeyReleased, this, std::placeholders::_1));
-        EventDispatcher::getInstance().Dispatch<WindowCloseEvent>(e, std::bind(onCloseTriggered, this, std::placeholders::_1));
+        EventDispatcher::getInstance().Dispatch<KeyReleasedEvent>(e, std::bind(&Application::onKeyReleased, this, std::placeholders::_1));
+        EventDispatcher::getInstance().Dispatch<WindowCloseEvent>(e, std::bind(&Application::onCloseTriggered, this, std::placeholders::_1));
     }
 
 
 
-    void Application::init(const std::string &appName, int length, int width)
+    void Application::init(const std::string &appName, uint32_t length, uint32_t width)
     {
         window = std::make_shared<WindowsWindow>(WindowProps{appName, length, width});
         if (!window)

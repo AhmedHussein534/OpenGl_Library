@@ -20,7 +20,7 @@ namespace GL_ENGINE
     class Application
     {
         public:
-        Application(const std::string &appName, int length, int width);
+        Application(const std::string &appName, uint32_t length, uint32_t width);
 
         virtual void onDeltaStep() = 0;
 
@@ -37,7 +37,7 @@ namespace GL_ENGINE
         float getFps();
 
         private:
-        void init(const std::string &appName, int length, int width);
+        void init(const std::string &appName, uint32_t length, uint32_t width);
 
 
         protected:
