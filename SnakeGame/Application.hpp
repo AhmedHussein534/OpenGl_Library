@@ -24,7 +24,7 @@ namespace GL_ENGINE
 
         virtual void onDeltaStep() = 0;
 
-        virtual bool onKeyReleased(const KeyReleasedEvent &e) = 0;
+        virtual bool onKeyPressed(const KeyPressedEvent &e) = 0;
 
         virtual bool onCloseTriggered(const WindowCloseEvent &e) = 0;
 

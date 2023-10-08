@@ -57,7 +57,7 @@ namespace SnakeGame
         bool isWormSelfCollided();
         void executeGame();
         virtual void onDeltaStep() override;
-        virtual bool onKeyReleased(const KeyReleasedEvent &e) override;
+        virtual bool onKeyPressed(const KeyPressedEvent &e) override;
         virtual bool onCloseTriggered(const WindowCloseEvent &e) override;
 
         private:

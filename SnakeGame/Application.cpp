@@ -41,7 +41,7 @@ namespace GL_ENGINE
 
     void Application::onEvent(Event& e)
     {
-        EventDispatcher::getInstance().Dispatch<KeyReleasedEvent>(e, std::bind(&Application::onKeyReleased, this, std::placeholders::_1));
+        EventDispatcher::getInstance().Dispatch<KeyPressedEvent>(e, std::bind(&Application::onKeyPressed, this, std::placeholders::_1));
         EventDispatcher::getInstance().Dispatch<WindowCloseEvent>(e, std::bind(&Application::onCloseTriggered, this, std::placeholders::_1));
         EventDispatcher::getInstance().Dispatch<WindowResizeEvent>(e, std::bind(&Application::onWindowResize, this, std::placeholders::_1));
         EventDispatcher::getInstance().Dispatch<WindowFocusEvent>(e, std::bind(&Application::onFocusChange, this, std::placeholders::_1));

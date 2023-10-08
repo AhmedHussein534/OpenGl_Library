@@ -205,7 +205,7 @@ namespace SnakeGame
         return true;
     }
 
-    bool SnakeGame::onKeyReleased(const KeyReleasedEvent &e)
+    bool SnakeGame::onKeyPressed(const KeyPressedEvent &e)
     {
         if (!m_gameRunning)
         {
