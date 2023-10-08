@@ -29,10 +29,10 @@ namespace SnakeGame
         GL_ENGINE::Renderer2D::getRenderer().beginScene(-halfCoordinate * aspectRatio, halfCoordinate * aspectRatio, -halfCoordinate, halfCoordinate);
         backgroundLayoutKey = GL_ENGINE::Renderer2D::getRenderer().createLayout();
         wormLayoutKey = GL_ENGINE::Renderer2D::getRenderer().createLayout();
-        food = createRandomFood();
         initBackground();
         initBorders();
         initWorm();
+        food = createRandomFood();
     }
 
     std::string SnakeGame::to_string(MOVE_DIRECTION direction)
@@ -463,7 +463,7 @@ namespace SnakeGame
     {
         if (isWormSelfCollided() || isPieceOutside(worm.back()))
         {
-            std::cout << "Game over" << std::endl << std::endl;
+            std::cout << std::endl << std::endl << "Game over" << std::endl << std::endl;
             borders = {};
             worm.clear();
             food = nullptr;
@@ -472,8 +472,6 @@ namespace SnakeGame
         }
         else if (isTwoPiecesCollided(worm.back(), food))
         {
-            std::cout << "Worm has eaten" << std::endl;
-
             auto headItr = worm.rbegin();
             auto prevHead = *(headItr);
             headItr++;
@@ -488,7 +486,7 @@ namespace SnakeGame
                 updateFps(getFps() * 1.1f);
             }
 
-            std::cout << "Score: " << worm.size() - wormLen << std::endl;
+            std::cout << "\rScore: " << worm.size() - wormLen;
         }
         else
         {
