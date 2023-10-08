@@ -1,26 +1,22 @@
 # CMakeList.txt : CMake project for SnakeGame, include source and define
 # project specific logic here.
 #
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.5)
 set(CMAKE_BUILD_TYPE Release)
 
-set(BOOST_ROOT "C:\\local\\boost_1_83_0")
 find_package(OpenGL REQUIRED)
-find_package(Boost REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 ")
 add_definitions(-DGLEW_STATIC)
 add_definitions(-DGLFW_BUILD_WIN32)
 
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/external/glfw")
-
-include_directories(
-	"${CMAKE_CURRENT_SOURCE_DIR}/engine"
-)
-
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/")
 
 # Add source to this project's executable.
-add_library (GLEngine
+add_library (GLEngine STATIC
             "src/Application.cpp"
             "src/Renderer.cpp"
             "src/VertexBuffer.cpp"
@@ -43,7 +39,6 @@ target_include_directories(GLEngine PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include/"
     "${CMAKE_CURRENT_SOURCE_DIR}/external/glew/include"
 	"${CMAKE_CURRENT_SOURCE_DIR}"
-    "${Boost_INCLUDE_DIRS}"
 )
 
 target_include_directories(GLEngine PUBLIC
@@ -51,14 +46,11 @@ target_include_directories(GLEngine PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
-target_link_directories(GLEngine PUBLIC
-    "${CMAKE_BINARY_DIR}/GLEngine/external/glfw/src/"
+target_link_directories(GLEngine PRIVATE
+    "${CMAKE_CURRENT_BINARY_DIR}/external/glfw/src/"
 )
-message("${CMAKE_BINARY_DIR}/GLEngine/external/glfw/src/")
 
-target_link_libraries(GLEngine PUBLIC
+target_link_libraries(GLEngine PRIVATE
 	"${OPENGL_LIBRARY}"
-	"glfw3"
+	"glfw"
 )
-
-
