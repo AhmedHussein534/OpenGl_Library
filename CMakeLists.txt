@@ -4,6 +4,7 @@
 
 cmake_minimum_required (VERSION 3.0)
 project("SnakeGame")
+add_subdirectory("GLEngine")
 add_subdirectory("SnakeGame")
 
 

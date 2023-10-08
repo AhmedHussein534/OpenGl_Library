@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 #include "SnakeGame.hpp"
-#include "engine/Debug.hpp"
+#include "Debug.hpp"
 
 
 namespace SnakeGame

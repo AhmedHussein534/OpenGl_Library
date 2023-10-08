@@ -4,52 +4,17 @@
 cmake_minimum_required (VERSION 3.1)
 set(CMAKE_BUILD_TYPE Release)
 
-set(BOOST_ROOT "C:\\local\\boost_1_83_0")
-find_package(OpenGL REQUIRED)
-find_package(Boost REQUIRED)
+add_executable (SnakeGame
+                "SnakeGame.cpp"
+				"main.cpp"
+)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 ")
-add_definitions(-DGLEW_STATIC)
-add_definitions(-DGLFW_BUILD_WIN32)
-
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/external/glfw")
-
-include_directories(
-	"${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include/"
-	"${CMAKE_CURRENT_SOURCE_DIR}/external/glew/include"
-	"${CMAKE_CURRENT_SOURCE_DIR}/external/glm"
-	"${CMAKE_CURRENT_SOURCE_DIR}/engine"
-	"${Boost_INCLUDE_DIRS}"
+target_include_directories(SnakeGame PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-link_directories("${CMAKE_BINARY_DIR}/SnakeGame/external/glfw/src/")
-message("${CMAKE_BINARY_DIR}/SnakeGame/external/glfw/src/")
-# Add source to this project's executable.
-add_executable (SnakeGame
-                "SnakeGame.cpp"
-				"Application.cpp"
-				"main.cpp"
-				"engine/Renderer.cpp"
-				"engine/VertexBuffer.cpp"
-				"engine/IndexBuffer.cpp"
-				"engine/VertexArray.cpp"
-				"engine/Shader.cpp"
-				"engine/Layout.cpp"
-				"engine/Renderer2D.cpp"
-				"engine/Elements/Rectangle.cpp"
-			    "engine/Elements/Texture.cpp"
-				"engine/Elements/TextureAsset.cpp"
-				"engine/Cameras/OrthographicCamera.cpp"
-				"engine/Cameras/PerspectiveCamera.cpp"
-				"external/stb_image/stb_image.cpp"
-				"external/glew/src/glew.c"
-				"window/Windows/WindowsWindow.cpp"
-				)
-
 target_link_libraries(SnakeGame
-	"${OPENGL_LIBRARY}"
-	"glfw3"
+	GLEngine
 )
 
 add_custom_command(TARGET SnakeGame PRE_BUILD
