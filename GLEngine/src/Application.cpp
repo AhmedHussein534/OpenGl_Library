@@ -88,7 +88,7 @@ namespace GL_ENGINE
 
     void Application::resetFps()
     {
-        m_fps = 6;
+        m_fps = 60;
         recalculateDelta();
     }
 

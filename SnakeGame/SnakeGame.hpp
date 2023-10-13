@@ -3,7 +3,13 @@
 
 #pragma once
 
+#include <list>
+#include <array>
+#include <memory>
+
 #include "Application.hpp"
+
+
 
 
 namespace SnakeGame
@@ -25,7 +31,6 @@ namespace SnakeGame
     constexpr uint32_t coordinateSize = 1000;
     constexpr float halfCoordinate = coordinateSize / 2.0f;
     constexpr float wormPieceSize = 0.04f *  coordinateSize;// always make sure this is divisible by 2
-    constexpr float step = wormPieceSize;
     constexpr float startYPos = wormPieceSize / 2.0f;
     constexpr uint32_t wormLen = 4;
     constexpr size_t borderCount = 4;
@@ -47,15 +52,16 @@ namespace SnakeGame
         glm::vec3 getDirectionUnitVector(MOVE_DIRECTION direction);
         void initWorm();
         void initBackground();
-        void moveWormPieceInDirection(std::shared_ptr<WormPiece> piece);
-        void moveWormPieceToOther(std::shared_ptr<WormPiece> pieceToMove, std::shared_ptr<WormPiece> otherPiece);
+        void moveWormPieceInDirection(std::shared_ptr<WormPiece> piece, MOVE_DIRECTION direction, float m_step);
         void assignAssetToHead(std::shared_ptr<WormPiece> head);
-        void assignAssetToTail(std::shared_ptr<WormPiece> tail, std::shared_ptr<WormPiece> nextPiece);
-        void assignAssetToBody(std::shared_ptr<WormPiece> prev, std::shared_ptr<WormPiece> body, std::shared_ptr<WormPiece> next);
+        void assignAssetToTail(std::shared_ptr<WormPiece> tail);
+        void assignAssetToBody();
         std::shared_ptr<WormPiece> createRandomFood();
         void moveWorm();
         bool isWormSelfCollided();
-        void executeGame();
+        void assignAssetsToWorm();
+        void updateMoveDirection();
+        bool isInCoordinateCenter();
         virtual void onDeltaStep() override;
         virtual bool onKeyPressed(const KeyPressedEvent &e) override;
         virtual bool onCloseTriggered(const WindowCloseEvent &e) override;
@@ -65,9 +71,12 @@ namespace SnakeGame
         uint32_t backgroundLayoutKey;
         uint32_t wormLayoutKey;
         std::array<std::shared_ptr<border>, borderCount> borders;
+        std::list<MOVE_DIRECTION> directions;
         std::shared_ptr<WormPiece> food;
         Worm worm;
-        MOVE_DIRECTION moveDirection;
-        MOVE_DIRECTION lastMoveDirection;
+        MOVE_DIRECTION nextMoveDirection;
+        MOVE_DIRECTION currentMoveDirection;
+        float drawResolution;
+        float defaultFps;
     };
 }

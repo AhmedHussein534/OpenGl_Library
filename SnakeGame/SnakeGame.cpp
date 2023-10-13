@@ -1,11 +1,8 @@
 ﻿#include <iostream>
-#include <list>
-#include <memory>
 #include <chrono>
 #include <windows.h>
 #include <random>
 #include <vector>
-#include <array>
 #include <unordered_map>
 
 #include "SnakeGame.hpp"
@@ -15,11 +12,14 @@
 namespace SnakeGame
 {
     SnakeGame::SnakeGame() : Application("SnakeGame", coordinateSize, coordinateSize),
-                             moveDirection(MOVE_DIRECTION::UP),
-                             lastMoveDirection(MOVE_DIRECTION::UP)
+                             nextMoveDirection(MOVE_DIRECTION::RIGHT),
+                             currentMoveDirection(MOVE_DIRECTION::RIGHT),
+                             drawResolution(1),
+                             defaultFps(6.0f)
     {
         initAssets();
         startGame();
+        updateFps(defaultFps);
     }
 
     void SnakeGame::startGame()
@@ -58,8 +58,8 @@ namespace SnakeGame
     {
         const std::string extenstion = ".png";
         std::array<std::string, 15> assetsToLoad = {
-            "apple", "body_downleft", "body_downright", "body_horizontal",
-            "body_upleft", "body_upright", "body_vertical", "head_down",
+            "apple", "body_rightup", "body_leftup", "body_horizontal",
+            "body_rightdown", "body_leftdown", "body_vertical", "head_down",
             "head_left", "head_right", "head_up", "tail_down",
             "tail_left", "tail_right", "tail_up"};
 
@@ -75,10 +75,10 @@ namespace SnakeGame
             texAssetsMap[asset] = assetCreated;
         }
 
-        texAssetsMap["body_rightup"] = texAssetsMap["body_downleft"];
-        texAssetsMap["body_leftdown"] = texAssetsMap["body_upright"];
-        texAssetsMap["body_rightdown"] = texAssetsMap["body_upleft"];
-        texAssetsMap["body_leftup"] = texAssetsMap["body_downright"];
+        texAssetsMap["body_downleft"]  = texAssetsMap["body_rightup"];
+        texAssetsMap["body_upright"]   = texAssetsMap["body_leftdown"];
+        texAssetsMap["body_upleft"]    = texAssetsMap["body_rightdown"];
+        texAssetsMap["body_downright"] = texAssetsMap["body_leftup"];
         return true;
     }
 
@@ -160,9 +160,9 @@ namespace SnakeGame
             int squareX = static_cast<int>(squareCenter[0]);
             int squareY = static_cast<int>(squareCenter[1]);
             ret = (squareX > static_cast<int>(halfCoordinate - wormPieceSize)) ||
-                (squareX < static_cast<int>(-halfCoordinate + wormPieceSize)) ||
-                (squareY < static_cast<int>(-halfCoordinate + wormPieceSize)) ||
-                (squareY > static_cast<int>(halfCoordinate - wormPieceSize));
+                  (squareX < static_cast<int>(-halfCoordinate + wormPieceSize)) ||
+                  (squareY < static_cast<int>(-halfCoordinate + wormPieceSize)) ||
+                  (squareY > static_cast<int>(halfCoordinate - wormPieceSize));
         }
 
         return ret;
@@ -211,35 +211,36 @@ namespace SnakeGame
         {
             resetFps();
             startGame();
+            updateFps(defaultFps);
             m_gameRunning = true;
         }
 
         switch (e.GetKeyCode())
         {
             case Key::Up:
-                if (lastMoveDirection != MOVE_DIRECTION::DOWN)
+                if (currentMoveDirection != MOVE_DIRECTION::DOWN)
                 {
-                    moveDirection = MOVE_DIRECTION::UP;
+                    nextMoveDirection = MOVE_DIRECTION::UP;
                 }
 
                 break;
             case Key::Down:
-                if (lastMoveDirection != MOVE_DIRECTION::UP)
+                if (currentMoveDirection != MOVE_DIRECTION::UP)
                 {
-                    moveDirection = MOVE_DIRECTION::DOWN;
+                    nextMoveDirection = MOVE_DIRECTION::DOWN;
                 }
 
                 break;
             case Key::Right:
-                if (lastMoveDirection != MOVE_DIRECTION::LEFT)
+                if (currentMoveDirection != MOVE_DIRECTION::LEFT)
                 {
-                    moveDirection = MOVE_DIRECTION::RIGHT;
+                    nextMoveDirection = MOVE_DIRECTION::RIGHT;
                 }
                 break;
             case Key::Left:
-                if (lastMoveDirection != MOVE_DIRECTION::RIGHT)
+                if (currentMoveDirection != MOVE_DIRECTION::RIGHT)
                 {
-                    moveDirection = MOVE_DIRECTION::LEFT;
+                    nextMoveDirection = MOVE_DIRECTION::LEFT;
                 }
 
                 break;
@@ -260,6 +261,7 @@ namespace SnakeGame
         {
             auto piece = std::make_shared<WormPiece>(getAsset("head_down"), currentXPiecePos, startYPos, wormPieceSize, wormPieceSize); //only draw 80% of each size to leave gap
             worm.push_back(piece);
+            directions.push_back(MOVE_DIRECTION::RIGHT);
             GL_ENGINE::Renderer2D::getRenderer().addElement(wormLayoutKey, piece);
             currentXPiecePos += wormPieceSize;
         }
@@ -292,21 +294,12 @@ namespace SnakeGame
         }
     }
 
-    void SnakeGame::moveWormPieceInDirection(std::shared_ptr<WormPiece> piece)
+    void SnakeGame::moveWormPieceInDirection(std::shared_ptr<WormPiece> piece, MOVE_DIRECTION direction, float m_step)
     {
         HZ_PROFILE_FUNCTION();
         auto pieceModel = piece->getModel();
-        auto dirUnitVector = getDirectionUnitVector(moveDirection);
-        *pieceModel = glm::translate(*pieceModel, dirUnitVector * step);
-    }
-
-    void SnakeGame::moveWormPieceToOther(std::shared_ptr<WormPiece> pieceToMove, std::shared_ptr<WormPiece> otherPiece)
-    {
-        HZ_PROFILE_FUNCTION();
-        auto pieceModel = pieceToMove->getModel();
-        auto center = pieceToMove->getCenter();
-        glm::vec3 nextPieceCenter = otherPiece->getCenter();
-        *pieceModel = glm::translate(*pieceModel, glm::normalize(nextPieceCenter - center) * step);
+        auto dirUnitVector = getDirectionUnitVector(direction);
+        *pieceModel = glm::translate(*pieceModel, dirUnitVector * m_step);
     }
 
     MOVE_DIRECTION directionFromPieces(std::shared_ptr<WormPiece> piece, std::shared_ptr<WormPiece> next)
@@ -336,91 +329,91 @@ namespace SnakeGame
 
     void SnakeGame::assignAssetToHead(std::shared_ptr<WormPiece> head)
     {
-        std::string dirStr = to_string(moveDirection);
+        std::string dirStr = to_string(*(directions.rbegin()));
         std::string headAsset = "head_" + dirStr;
         head->setTexAsset(getAsset(headAsset));
     }
 
-    void SnakeGame::assignAssetToTail(std::shared_ptr<WormPiece> tail, std::shared_ptr<WormPiece> nextPiece)
+    void SnakeGame::assignAssetToTail(std::shared_ptr<WormPiece> tail)
     {
-        auto direction = directionFromPieces(nextPiece, tail);
-        std::string dirStr = to_string(direction);
+        auto afterTail = directions.begin();
+        afterTail++;
+
+        std::string dirStr = to_string(*(afterTail));
         std::string tailAsset = "tail_" + dirStr;
         tail->setTexAsset(getAsset(tailAsset));
     }
 
-    void SnakeGame::assignAssetToBody(std::shared_ptr<WormPiece> prev, std::shared_ptr<WormPiece> body, std::shared_ptr<WormPiece> next)
+    void SnakeGame::assignAssetToBody()
     {
-        std::string bodyAsset = "body_";
-        auto prevDir = directionFromPieces(prev, body);
-        auto nextDir = directionFromPieces(body, next);
-        if ((prevDir == MOVE_DIRECTION::LEFT || prevDir == MOVE_DIRECTION::RIGHT) && (nextDir == MOVE_DIRECTION::LEFT || nextDir == MOVE_DIRECTION::RIGHT))
+        auto it = worm.begin();
+        auto dirIt = directions.begin();
+        it++; // skip tail
+        while (true)
         {
-            bodyAsset += "horizontal";
-        }
-        else if ((prevDir == MOVE_DIRECTION::UP || prevDir == MOVE_DIRECTION::DOWN) && (nextDir == MOVE_DIRECTION::UP || nextDir == MOVE_DIRECTION::DOWN))
-        {
-            bodyAsset += "vertical";
-        }
-        else
-        {
-            std::string prevDirStr = to_string(prevDir);
-            bodyAsset += prevDirStr;
-            auto nextDir = directionFromPieces(body, next);
-            std::string nextDirStr = to_string(nextDir);
-            bodyAsset += nextDirStr;
-        }
+            auto prevDir = *dirIt;
+            auto currentPiece = it;
+            it++;
+            std::string bodyAsset = "body_";
+            dirIt++;
 
-        body->setTexAsset(getAsset(bodyAsset));
+            if (it != worm.end())
+            {
+                auto currentDir = *dirIt;
+                auto nextDirIt = dirIt;
+                nextDirIt++;
+                auto nextDir = *nextDirIt;
+                if ((currentDir == MOVE_DIRECTION::LEFT || currentDir == MOVE_DIRECTION::RIGHT) && (nextDir == MOVE_DIRECTION::LEFT || nextDir == MOVE_DIRECTION::RIGHT))
+                {
+                    bodyAsset += "horizontal";
+                }
+                else if ((currentDir == MOVE_DIRECTION::UP || currentDir == MOVE_DIRECTION::DOWN) && (nextDir == MOVE_DIRECTION::UP || nextDir == MOVE_DIRECTION::DOWN))
+                {
+                    bodyAsset += "vertical";
+                }
+                else
+                {
+                    std::string currentDirStr = to_string(currentDir);
+                    bodyAsset += currentDirStr;
+                    std::string nextDirStr = to_string(nextDir);
+                    bodyAsset += nextDirStr;
+                }
+            }
+            else
+            {
+                break;
+            }
+
+            (*currentPiece)->setTexAsset(getAsset(bodyAsset));
+        }
     }
 
     void SnakeGame::moveWorm()
     {
         HZ_PROFILE_FUNCTION();
+        auto drawStep = wormPieceSize / drawResolution;
+        uint32_t dirItr = 0;
         auto it = worm.begin();
+        auto dir = directions.begin();
         while (it != worm.end())
         {
-            std::shared_ptr<WormPiece> pieceToMove = *it;
+            moveWormPieceInDirection(*it, *dir, drawStep);
+            dir++;
             it++;
-            if (it != worm.end())
-            {
-                moveWormPieceToOther(pieceToMove, *it);
-            }
-            else
-            {
-                moveWormPieceInDirection(pieceToMove);
-            }
         }
 
-        it = worm.begin();
-        while (it != worm.end())
-        {
-            bool isTail = (it == worm.begin());
-            std::shared_ptr<WormPiece> currentPiece = *it;
-            auto prevItr = it;
-            if (it != worm.begin())
-            {
-                prevItr--;
-            }
+        assignAssetsToWorm();
 
-            it++;
-            if (it != worm.end())
-            {
-                if (isTail)
-                {
-                    assignAssetToTail(currentPiece, *it);
-                }
-                else
-                {
-                    assignAssetToBody(*prevItr, currentPiece, *it);
-                }
-            }
-            else
-            {
-                assignAssetToHead(currentPiece);
-            }
-        }
+        GL_ENGINE::Renderer2D::getRenderer().drawScene();
     }
+
+    void SnakeGame::assignAssetsToWorm()
+    {
+        assignAssetToHead(*(worm.rbegin()));
+        assignAssetToTail(*(worm.begin()));
+        assignAssetToBody();
+    }
+
 
     std::shared_ptr<WormPiece> SnakeGame::createRandomFood()
     {
@@ -458,6 +451,52 @@ namespace SnakeGame
 
     }
 
+    bool SnakeGame::isInCoordinateCenter()
+    {
+        bool ret = false;
+        static int i = -1;
+        i = (i + 1) % (static_cast<int>(drawResolution));
+        if (i == 0)
+        {
+            ret = true;
+            auto center = (*(worm.rbegin()))->getCenter();
+            std::cout << "center of head at center: " << glm::to_string(center) << std::endl;
+        }
+
+
+
+        return ret;
+        /*
+        auto ret = false;
+        auto center = (*(worm.rbegin()))->getCenter();
+        int32_t stepInt = static_cast<int32_t>(step * 10000000.0f);
+        int32_t halfStepInt = stepInt / 2;
+        int32_t centerX = static_cast<int32_t>(center[0] * 10000000.0f);
+        int32_t centerY = static_cast<int32_t>(center[1] *10000000.0f);
+
+        if ((centerX % stepInt == 0) && (centerY % stepInt == 0))
+        {
+            ret =  true;
+        }
+
+        return ret;
+        */
+    }
+
+    void SnakeGame::updateMoveDirection()
+    {
+        currentMoveDirection = nextMoveDirection;
+        directions.pop_front();
+        directions.push_back(currentMoveDirection);
+
+        std::cout << glm::to_string((*(worm.rbegin()))->getCenter()) << std::endl;
+        for (auto &d : directions)
+        {
+            std::cout << to_string(d) << " ";
+        }
+
+        std::cout << std::endl;
+    }
 
     void SnakeGame::onDeltaStep()
     {
@@ -466,35 +505,32 @@ namespace SnakeGame
             std::cout << std::endl << std::endl << "Game over" << std::endl << std::endl;
             borders = {};
             worm.clear();
+            directions.clear();
             food = nullptr;
             GL_ENGINE::Renderer2D::getRenderer().endScene();
             m_gameRunning = false;
+            GL_ENGINE::Renderer2D::getRenderer().drawScene();
         }
         else if (isTwoPiecesCollided(worm.back(), food))
         {
-            auto headItr = worm.rbegin();
-            auto prevHead = *(headItr);
-            headItr++;
-            auto beforePrevHead = *(headItr);
-            moveWormPieceInDirection(food);
-            assignAssetToHead(food);
-            assignAssetToBody(beforePrevHead, prevHead, food);
+            auto drawStep = wormPieceSize / drawResolution;
+            directions.push_back(*directions.rbegin());
             worm.push_back(food);
+            moveWormPieceInDirection(food, *directions.rbegin(), drawStep);
+            assignAssetToHead(food);
+            assignAssetToBody();
             food = createRandomFood();
-            if (worm.size() % 5 == 0)
-            {
-                updateFps(getFps() * 1.1f);
-            }
-
             std::cout << "\rScore: " << worm.size() - wormLen;
+            GL_ENGINE::Renderer2D::getRenderer().drawScene();
         }
         else
         {
+            if (isInCoordinateCenter())
+            {
+                updateMoveDirection();
+            }
             moveWorm();
         }
-
-        GL_ENGINE::Renderer2D::getRenderer().drawScene();
-        lastMoveDirection = moveDirection;
     }
 }
 

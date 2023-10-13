@@ -59,7 +59,7 @@ namespace GL_ENGINE
 
         private:
         const float sleepToDelta = 0.05f;
-        float m_fps = 6;
+        float m_fps = 6.0;
         float deltaTime_ms = 1000.0f / m_fps;
         float sleepTime_ms = sleepToDelta * deltaTime_ms;
         std::shared_ptr<WindowsWindow> window;
