@@ -14,8 +14,8 @@ namespace SnakeGame
     SnakeGame::SnakeGame() : Application("SnakeGame", coordinateSize, coordinateSize),
                              nextMoveDirection(MOVE_DIRECTION::RIGHT),
                              currentMoveDirection(MOVE_DIRECTION::RIGHT),
-                             drawResolution(1),
-                             defaultFps(6.0f)
+                             drawResolution(8),
+                             defaultFps(30.0f)
     {
         initAssets();
         startGame();
@@ -460,27 +460,9 @@ namespace SnakeGame
         {
             ret = true;
             auto center = (*(worm.rbegin()))->getCenter();
-            std::cout << "center of head at center: " << glm::to_string(center) << std::endl;
-        }
-
-
-
-        return ret;
-        /*
-        auto ret = false;
-        auto center = (*(worm.rbegin()))->getCenter();
-        int32_t stepInt = static_cast<int32_t>(step * 10000000.0f);
-        int32_t halfStepInt = stepInt / 2;
-        int32_t centerX = static_cast<int32_t>(center[0] * 10000000.0f);
-        int32_t centerY = static_cast<int32_t>(center[1] *10000000.0f);
-
-        if ((centerX % stepInt == 0) && (centerY % stepInt == 0))
-        {
-            ret =  true;
         }
 
         return ret;
-        */
     }
 
     void SnakeGame::updateMoveDirection()
@@ -488,24 +470,47 @@ namespace SnakeGame
         currentMoveDirection = nextMoveDirection;
         directions.pop_front();
         directions.push_back(currentMoveDirection);
-
-        std::cout << glm::to_string((*(worm.rbegin()))->getCenter()) << std::endl;
-        for (auto &d : directions)
-        {
-            std::cout << to_string(d) << " ";
-        }
-
-        std::cout << std::endl;
     }
 
     void SnakeGame::onDeltaStep()
     {
+        if (piecesToAdd.size() != 0)
+        {
+            auto beginItr = worm.begin();
+            auto tail = *(beginItr);
+            beginItr++;
+            auto afterTail = *(beginItr);
+            auto pieceToAdd = piecesToAdd.front();
+            auto pieceCenter = pieceToAdd->getCenter();
+            auto tailCenter = tail->getCenter();
+            auto afterTailCenter = afterTail->getCenter();
+            auto distanceToTail = glm::length(tailCenter - pieceCenter);
+            std::cout << "distanceToTail: " << distanceToTail << std::endl;
+            if ((!isTwoPiecesCollided(pieceToAdd, afterTail)) &&
+                ((distanceToTail == wormPieceSize) ||
+                (distanceToTail == -wormPieceSize)))
+            {
+                directions.push_front(*directions.rbegin());
+                worm.push_front(pieceToAdd);
+                piecesToAdd.pop_front();
+            }
+            else
+            {
+                std::cout << "UNSATISIFED: " << std::endl;
+                std::cout << "pieceCenter: " << glm::to_string(pieceCenter) << std::endl;
+                std::cout << "tailCenter: " << glm::to_string(tailCenter) << std::endl;
+                std::cout << "afterTailCenter: " << glm::to_string(afterTailCenter) << std::endl;
+                std::cout << std::endl;
+            }
+        }
+
         if (isWormSelfCollided() || isPieceOutside(worm.back()))
         {
             std::cout << std::endl << std::endl << "Game over" << std::endl << std::endl;
             borders = {};
             worm.clear();
             directions.clear();
+            piecesToAdd.clear();
             food = nullptr;
             GL_ENGINE::Renderer2D::getRenderer().endScene();
             m_gameRunning = false;
@@ -513,14 +518,9 @@ namespace SnakeGame
         }
         else if (isTwoPiecesCollided(worm.back(), food))
         {
-            auto drawStep = wormPieceSize / drawResolution;
-            directions.push_back(*directions.rbegin());
-            worm.push_back(food);
-            moveWormPieceInDirection(food, *directions.rbegin(), drawStep);
-            assignAssetToHead(food);
-            assignAssetToBody();
+            piecesToAdd.push_back(food);
             food = createRandomFood();
-            std::cout << "\rScore: " << worm.size() - wormLen;
+            std::cout << "\rScore: " << worm.size() + piecesToAdd.size() - wormLen;
             GL_ENGINE::Renderer2D::getRenderer().drawScene();
         }
         else
