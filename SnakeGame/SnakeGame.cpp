@@ -14,7 +14,7 @@ namespace SnakeGame
     SnakeGame::SnakeGame() : Application("SnakeGame", coordinateSize, coordinateSize),
                              nextMoveDirection(MOVE_DIRECTION::RIGHT),
                              currentMoveDirection(MOVE_DIRECTION::RIGHT),
-                             defaultFps(30.0f),
+                             defaultFps(15.0f),
                              drawResolution(4),
                              resolutionStep(0)
     {
@@ -98,22 +98,25 @@ namespace SnakeGame
     bool SnakeGame::initBorders()
     {
         HZ_PROFILE_FUNCTION();
-        constexpr std::array<float, borderCount> xCoordinates = {-halfCoordinate,
-                                                                -halfCoordinate,
-                                                                -halfCoordinate,
-                                                                halfCoordinate-wormPieceSize};
-        constexpr std::array<float, borderCount> yCoordinates = {-halfCoordinate+wormPieceSize,
-                                                                halfCoordinate,
-                                                                halfCoordinate,
-                                                                halfCoordinate};
-        constexpr std::array<float, borderCount> length = {coordinateSize,
+        constexpr int32_t alignedHalfCoordinate = halfCoordinate - (halfCoordinate % wormPieceSize) + (wormPieceSize / 2);
+        constexpr int32_t nAlignedHalfCoordinate = -alignedHalfCoordinate;
+
+        constexpr std::array<int32_t, borderCount> xCoordinates = {nAlignedHalfCoordinate,
+                                                                nAlignedHalfCoordinate,
+                                                                nAlignedHalfCoordinate,
+                                                                alignedHalfCoordinate-wormPieceSize};
+        constexpr std::array<int32_t, borderCount> yCoordinates = {nAlignedHalfCoordinate+wormPieceSize,
+                                                                alignedHalfCoordinate,
+                                                                alignedHalfCoordinate,
+                                                                alignedHalfCoordinate};
+        constexpr std::array<int32_t, borderCount> length = {alignedHalfCoordinate * 2,
                                                         wormPieceSize,
-                                                        coordinateSize,
+                                                        alignedHalfCoordinate * 2,
                                                         wormPieceSize};
-        constexpr std::array<float, borderCount> width = {wormPieceSize,
-                                                        coordinateSize,
-                                                        wormPieceSize,
-                                                        coordinateSize};
+        constexpr std::array<int32_t, borderCount> width = {wormPieceSize,
+                                                             alignedHalfCoordinate * 2,
+                                                             wormPieceSize,
+                                                             alignedHalfCoordinate * 2};
         size_t currentBorder = 0;
         for (auto &it : borders)
         {
@@ -255,6 +258,7 @@ namespace SnakeGame
     void SnakeGame::initWorm()
     {
         HZ_PROFILE_FUNCTION();
+        constexpr float startYPos = wormPieceSize / 2.0f;
         float currentXPiecePos = 0.0f - (wormPieceSize / 2.0f);
         for (uint32_t i = 0; i < wormLen; i++)
         {
@@ -273,8 +277,12 @@ namespace SnakeGame
         float green[2] = {215.0f/255.0f, 209.0f/255.0f};
         float blue[2] = {81.0f/255.0f, 73.0f/255.0f};
 
-        float currentXPos = -halfCoordinate;
-        float currentYPos = halfCoordinate;
+
+        int32_t startYPos = halfCoordinate - (halfCoordinate % wormPieceSize) + (wormPieceSize / 2);
+        int32_t startXPos = -startYPos;
+        int32_t currentXPos = startXPos;
+        int32_t currentYPos = startYPos;
+
         int xColorIndex = 0;
         while (currentXPos < halfCoordinate)
         {
@@ -287,7 +295,7 @@ namespace SnakeGame
                 yColorIndex = (yColorIndex + 1) % 2;
             }
 
-            currentYPos = halfCoordinate;
+            currentYPos = startYPos;
             currentXPos += wormPieceSize;
             xColorIndex = (xColorIndex + 1) % 2;
         }

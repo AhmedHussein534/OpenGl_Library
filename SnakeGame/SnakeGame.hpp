@@ -28,23 +28,10 @@ namespace SnakeGame
         LEFT,
     };
 
-    struct PieceToAdd
-    {
-        std::shared_ptr<WormPiece> piece;
-        uint32_t countDown;
-
-        PieceToAdd(std::shared_ptr<WormPiece> m_piece, uint32_t m_countDown) : piece(m_piece),
-                                                                               countDown(m_countDown)
-        {
-
-        }
-    };
-
-    constexpr uint32_t coordinateSize = 1000;
-    constexpr float halfCoordinate = coordinateSize / 2.0f;
-    constexpr float wormPieceSize = 0.04f *  coordinateSize;// always make sure this is divisible by 2
-    constexpr float startYPos = wormPieceSize / 2.0f;
-    constexpr uint32_t wormLen = 4;
+    constexpr int32_t coordinateSize = 1000;
+    constexpr int32_t halfCoordinate = coordinateSize / 2.0f;
+    constexpr int32_t wormPieceSize = 0.04f *  coordinateSize;// always make sure this is divisible by 2
+    constexpr int32_t wormLen = 4;
     constexpr size_t borderCount = 4;
 
     class SnakeGame : public GL_ENGINE::Application
