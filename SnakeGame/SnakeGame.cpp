@@ -504,19 +504,6 @@ namespace SnakeGame
 
     void SnakeGame::onDeltaStep()
     {
-        if (piecesToAdd.size() != 0)
-        {
-            auto& pieceToAdd = piecesToAdd.front();
-            pieceToAdd.countDown--;
-
-            if (pieceToAdd.countDown == 0)
-            {
-                worm.push_front(pieceToAdd.piece);
-                directions.push_front(directionFromPieces(pieceToAdd.piece, worm.front()));
-                piecesToAdd.pop_front();
-            }
-        }
-
         if (isWormSelfCollided() || isPieceOutside(worm.back()))
         {
             std::cout << std::endl << std::endl << "Game over" << std::endl << std::endl;
@@ -524,7 +511,6 @@ namespace SnakeGame
             borders = {};
             worm.clear();
             directions.clear();
-            piecesToAdd.clear();
             food = nullptr;
             GL_ENGINE::Renderer2D::getRenderer().endScene();
 
@@ -535,11 +521,8 @@ namespace SnakeGame
             {
                 if (isTwoPiecesCollided(worm.back(), food))
                 {
-
                     addPieceToWorm(food);
                     food = createRandomFood();
-                    std::cout << "\rScore: " << worm.size() + piecesToAdd.size() - wormLen;
-
                     GL_ENGINE::Renderer2D::getRenderer().drawScene();
                 }
 

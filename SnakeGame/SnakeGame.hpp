@@ -86,7 +86,6 @@ namespace SnakeGame
         std::array<std::shared_ptr<border>, borderCount> borders;
         std::list<MOVE_DIRECTION> directions;
         std::shared_ptr<WormPiece> food;
-        std::list<PieceToAdd> piecesToAdd;
         Worm worm;
         MOVE_DIRECTION nextMoveDirection;
         MOVE_DIRECTION currentMoveDirection;
