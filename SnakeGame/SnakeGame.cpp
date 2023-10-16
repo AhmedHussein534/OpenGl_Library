@@ -14,18 +14,19 @@ namespace SnakeGame
     SnakeGame::SnakeGame() : Application("SnakeGame", coordinateSize, coordinateSize),
                              nextMoveDirection(MOVE_DIRECTION::RIGHT),
                              currentMoveDirection(MOVE_DIRECTION::RIGHT),
-                             drawResolution(8),
-                             defaultFps(30.0f)
+                             defaultFps(30.0f),
+                             drawResolution(4),
+                             resolutionStep(0)
     {
         initAssets();
         startGame();
-        updateFps(defaultFps);
     }
 
     void SnakeGame::startGame()
     {
+        updateFps(defaultFps);
+        resolutionStep = 0;
         float aspectRatio = 1.0f;
-        Worm worm = {};
         GL_ENGINE::Renderer2D::getRenderer().beginScene(-halfCoordinate * aspectRatio, halfCoordinate * aspectRatio, -halfCoordinate, halfCoordinate);
         backgroundLayoutKey = GL_ENGINE::Renderer2D::getRenderer().createLayout();
         wormLayoutKey = GL_ENGINE::Renderer2D::getRenderer().createLayout();
@@ -209,10 +210,8 @@ namespace SnakeGame
     {
         if (!m_gameRunning)
         {
-            resetFps();
-            startGame();
-            updateFps(defaultFps);
             m_gameRunning = true;
+            startGame();
         }
 
         switch (e.GetKeyCode())
@@ -454,14 +453,13 @@ namespace SnakeGame
     bool SnakeGame::isInCoordinateCenter()
     {
         bool ret = false;
-        static int i = -1;
-        i = (i + 1) % (static_cast<int>(drawResolution));
-        if (i == 0)
+        if (resolutionStep % drawResolution == 0)
         {
             ret = true;
-            auto center = (*(worm.rbegin()))->getCenter();
+            resolutionStep = 0;
         }
 
+        resolutionStep++;
         return ret;
     }
 
@@ -472,63 +470,82 @@ namespace SnakeGame
         directions.push_back(currentMoveDirection);
     }
 
+    void SnakeGame::addPieceToWorm(std::shared_ptr<WormPiece> piece)
+    {
+        auto tailCenter = worm.front()->getCenter();
+        auto tailDirection = directions.front();
+        auto newCenter = tailCenter;
+        switch(tailDirection)
+        {
+            case MOVE_DIRECTION::UP:
+                newCenter[1] = newCenter[1] - wormPieceSize;
+                break;
+            case MOVE_DIRECTION::DOWN:
+                newCenter[1] = newCenter[1] + wormPieceSize;
+                break;
+            case MOVE_DIRECTION::RIGHT:
+                newCenter[0] = newCenter[0] - wormPieceSize;
+                break;
+            case MOVE_DIRECTION::LEFT:
+                newCenter[0] = newCenter[0] + wormPieceSize;
+                break;
+            default:
+                std::cout << "unknown direction" << std::endl;
+                assert(0);
+        }
+
+         auto pieceModel = piece->getModel();
+         auto center = piece->getCenter();
+         *pieceModel = glm::translate(*pieceModel, newCenter - center);
+
+         directions.push_front(directionFromPieces(piece, worm.front()));
+         worm.push_front(piece);
+    }
+
     void SnakeGame::onDeltaStep()
     {
         if (piecesToAdd.size() != 0)
         {
-            auto beginItr = worm.begin();
-            auto tail = *(beginItr);
-            beginItr++;
-            auto afterTail = *(beginItr);
-            auto pieceToAdd = piecesToAdd.front();
-            auto pieceCenter = pieceToAdd->getCenter();
-            auto tailCenter = tail->getCenter();
-            auto afterTailCenter = afterTail->getCenter();
-            auto distanceToTail = glm::length(tailCenter - pieceCenter);
-            std::cout << "distanceToTail: " << distanceToTail << std::endl;
-            if ((!isTwoPiecesCollided(pieceToAdd, afterTail)) &&
-                ((distanceToTail == wormPieceSize) ||
-                (distanceToTail == -wormPieceSize)))
+            auto& pieceToAdd = piecesToAdd.front();
+            pieceToAdd.countDown--;
+
+            if (pieceToAdd.countDown == 0)
             {
-                directions.push_front(*directions.rbegin());
-                worm.push_front(pieceToAdd);
+                worm.push_front(pieceToAdd.piece);
+                directions.push_front(directionFromPieces(pieceToAdd.piece, worm.front()));
                 piecesToAdd.pop_front();
-            }
-            else
-            {
-                std::cout << "UNSATISIFED: " << std::endl;
-                std::cout << "pieceCenter: " << glm::to_string(pieceCenter) << std::endl;
-                std::cout << "tailCenter: " << glm::to_string(tailCenter) << std::endl;
-                std::cout << "afterTailCenter: " << glm::to_string(afterTailCenter) << std::endl;
-                std::cout << std::endl;
             }
         }
 
         if (isWormSelfCollided() || isPieceOutside(worm.back()))
         {
             std::cout << std::endl << std::endl << "Game over" << std::endl << std::endl;
+            m_gameRunning = false;
             borders = {};
             worm.clear();
             directions.clear();
             piecesToAdd.clear();
             food = nullptr;
             GL_ENGINE::Renderer2D::getRenderer().endScene();
-            m_gameRunning = false;
-            GL_ENGINE::Renderer2D::getRenderer().drawScene();
-        }
-        else if (isTwoPiecesCollided(worm.back(), food))
-        {
-            piecesToAdd.push_back(food);
-            food = createRandomFood();
-            std::cout << "\rScore: " << worm.size() + piecesToAdd.size() - wormLen;
-            GL_ENGINE::Renderer2D::getRenderer().drawScene();
+
         }
         else
         {
             if (isInCoordinateCenter())
             {
+                if (isTwoPiecesCollided(worm.back(), food))
+                {
+
+                    addPieceToWorm(food);
+                    food = createRandomFood();
+                    std::cout << "\rScore: " << worm.size() + piecesToAdd.size() - wormLen;
+
+                    GL_ENGINE::Renderer2D::getRenderer().drawScene();
+                }
+
                 updateMoveDirection();
             }
+
             moveWorm();
         }
     }

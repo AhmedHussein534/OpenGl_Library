@@ -28,6 +28,18 @@ namespace SnakeGame
         LEFT,
     };
 
+    struct PieceToAdd
+    {
+        std::shared_ptr<WormPiece> piece;
+        uint32_t countDown;
+
+        PieceToAdd(std::shared_ptr<WormPiece> m_piece, uint32_t m_countDown) : piece(m_piece),
+                                                                               countDown(m_countDown)
+        {
+
+        }
+    };
+
     constexpr uint32_t coordinateSize = 1000;
     constexpr float halfCoordinate = coordinateSize / 2.0f;
     constexpr float wormPieceSize = 0.04f *  coordinateSize;// always make sure this is divisible by 2
@@ -62,6 +74,7 @@ namespace SnakeGame
         void assignAssetsToWorm();
         void updateMoveDirection();
         bool isInCoordinateCenter();
+        void addPieceToWorm(std::shared_ptr<WormPiece> piece);
         virtual void onDeltaStep() override;
         virtual bool onKeyPressed(const KeyPressedEvent &e) override;
         virtual bool onCloseTriggered(const WindowCloseEvent &e) override;
@@ -73,11 +86,12 @@ namespace SnakeGame
         std::array<std::shared_ptr<border>, borderCount> borders;
         std::list<MOVE_DIRECTION> directions;
         std::shared_ptr<WormPiece> food;
-        std::list<std::shared_ptr<WormPiece>> piecesToAdd;
+        std::list<PieceToAdd> piecesToAdd;
         Worm worm;
         MOVE_DIRECTION nextMoveDirection;
         MOVE_DIRECTION currentMoveDirection;
-        float drawResolution;
         float defaultFps;
+        uint32_t drawResolution;
+        uint32_t resolutionStep;
     };
 }
