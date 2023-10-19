@@ -4,6 +4,7 @@
 #include <random>
 #include <vector>
 #include <unordered_map>
+#include <iterator>
 
 #include "SnakeGame.hpp"
 #include "Debug.hpp"
@@ -207,6 +208,7 @@ namespace SnakeGame
             startGame();
         }
 
+        isFocused = true;
         switch (e.GetKeyCode())
         {
             case Key::Up:
@@ -292,10 +294,9 @@ namespace SnakeGame
 
     void SnakeGame::moveWormPieceInDirection(std::shared_ptr<WormPiece> piece, MOVE_DIRECTION direction, float m_step)
     {
-        HZ_PROFILE_FUNCTION();
-        auto dirUnitVector = getDirectionUnitVector(direction);
-        piece->x += dirUnitVector[0] * m_step;
-        piece->y += dirUnitVector[1] * m_step;
+        auto dirUnitVector = getDirectionUnitVector(direction) * m_step;
+        piece->x += dirUnitVector[0];
+        piece->y += dirUnitVector[1];
     }
 
     MOVE_DIRECTION directionFromPieces(std::shared_ptr<WormPiece> piece, std::shared_ptr<WormPiece> next)
@@ -327,81 +328,117 @@ namespace SnakeGame
         std::string dirStr = to_string(*(directions.rbegin()));
         std::string headAsset = "head_" + dirStr;
 
-        auto piece = std::make_shared<GL_ENGINE::Texture>(getAsset(headAsset), head->x, head->y, wormPieceSize, wormPieceSize);
+        auto piece = std::make_shared<GL_ENGINE::Texture>(getAsset(headAsset), head->x, head->y, 0.5f, wormPieceSize, wormPieceSize);
         GL_ENGINE::Renderer2D::getRenderer().addElement(wormLayoutKey, piece);
     }
 
     void SnakeGame::createTail()
     {
-        std::shared_ptr<WormPiece> tail = *(worm.begin());
-        auto afterTail = directions.begin();
-        afterTail++;
+        auto it = worm.begin();
+        auto tail = *it;
+        it++;
+        auto beforeTail = *it;
+        auto dirIt = directions.begin();
+        auto dir = *dirIt;
+        dirIt++;
+        auto beforeDir = *dirIt;
+        std::string tailAsset = "tail_" + to_string(beforeDir);
 
-        std::string dirStr = to_string(*(afterTail));
-        std::string tailAsset = "tail_" + dirStr;
+        tail->x = beforeTail->x;
+        tail->y = beforeTail->y;
+        switch (beforeDir)
+        {
+            case MOVE_DIRECTION::UP:
+                tail->y -= wormPieceSize;
+                break;
+            case MOVE_DIRECTION::DOWN:
+                tail->y += wormPieceSize;
+                break;
+            case MOVE_DIRECTION::RIGHT:
+                tail->x -= wormPieceSize;
+                break;
+            case MOVE_DIRECTION::LEFT:
+                tail->x += wormPieceSize;
+                break;
+            default:
+                std::cout << "Unknown direction" << std::endl;
+                assert(0);
+        }
 
-        auto piece = std::make_shared<GL_ENGINE::Texture>(getAsset(tailAsset), tail->x, tail->y, wormPieceSize, wormPieceSize);
+        auto piece = std::make_shared<GL_ENGINE::Texture>(getAsset(tailAsset), tail->x, tail->y, 0.5f, wormPieceSize, wormPieceSize);
         GL_ENGINE::Renderer2D::getRenderer().addElement(wormLayoutKey, piece);
     }
 
     void SnakeGame::createBody()
     {
-        auto it = worm.begin();
-        auto dirIt = directions.begin();
-        it++; // skip tail
-        while (true)
-        {
-            auto prevDir = *dirIt;
-            auto currentPiece = *it;
-            it++;
-            std::string bodyAsset = "body_";
-            dirIt++;
+        auto it = worm.rbegin();
+        auto dirIt = directions.rbegin();
 
-            if (it != worm.end())
+        auto prevDir = *dirIt;
+        auto prevPiece = *it;
+
+        // skip head
+        it++;
+        dirIt++;
+        while (std::next(it) != worm.rend())
+        {
+            std::string bodyAsset = "body_";
+            auto currentDir = *dirIt;
+            auto currentPiece = *it;
+            currentPiece->x = prevPiece->x;
+            currentPiece->y = prevPiece->y;
+            if ((currentDir == MOVE_DIRECTION::LEFT || currentDir == MOVE_DIRECTION::RIGHT) && (prevDir == MOVE_DIRECTION::LEFT || prevDir == MOVE_DIRECTION::RIGHT))
             {
-                auto currentDir = *dirIt;
-                auto nextDirIt = dirIt;
-                nextDirIt++;
-                auto nextDir = *nextDirIt;
-                if ((currentDir == MOVE_DIRECTION::LEFT || currentDir == MOVE_DIRECTION::RIGHT) && (nextDir == MOVE_DIRECTION::LEFT || nextDir == MOVE_DIRECTION::RIGHT))
-                {
-                    bodyAsset += "horizontal";
-                }
-                else if ((currentDir == MOVE_DIRECTION::UP || currentDir == MOVE_DIRECTION::DOWN) && (nextDir == MOVE_DIRECTION::UP || nextDir == MOVE_DIRECTION::DOWN))
-                {
-                    bodyAsset += "vertical";
-                }
-                else
-                {
-                    std::string currentDirStr = to_string(currentDir);
-                    bodyAsset += currentDirStr;
-                    std::string nextDirStr = to_string(nextDir);
-                    bodyAsset += nextDirStr;
-                }
+                bodyAsset += "horizontal";
+            }
+            else if ((currentDir == MOVE_DIRECTION::UP || currentDir == MOVE_DIRECTION::DOWN) && (prevDir == MOVE_DIRECTION::UP || prevDir == MOVE_DIRECTION::DOWN))
+            {
+                bodyAsset += "vertical";
             }
             else
             {
-                break;
+                std::string currentDirStr = to_string(currentDir);
+                bodyAsset += currentDirStr;
+                std::string nextDirStr = to_string(prevDir);
+                bodyAsset += nextDirStr;
             }
 
-            auto piece = std::make_shared<GL_ENGINE::Texture>(getAsset(bodyAsset), currentPiece->x, currentPiece->y, wormPieceSize, wormPieceSize);
+            switch (prevDir)
+            {
+                case MOVE_DIRECTION::UP:
+                    currentPiece->y -= wormPieceSize;
+                    break;
+                case MOVE_DIRECTION::DOWN:
+                    currentPiece->y += wormPieceSize;
+                    break;
+                case MOVE_DIRECTION::RIGHT:
+                    currentPiece->x -= wormPieceSize;
+                    break;
+                case MOVE_DIRECTION::LEFT:
+                    currentPiece->x += wormPieceSize;
+                    break;
+                default:
+                    std::cout << "Unknown direction" << std::endl;
+                    assert(0);
+            }
+
+
+            auto piece = std::make_shared<GL_ENGINE::Texture>(getAsset(bodyAsset), currentPiece->x, currentPiece->y, 0.5f, wormPieceSize, wormPieceSize);
             GL_ENGINE::Renderer2D::getRenderer().addElement(wormLayoutKey, piece);
+            prevDir = *dirIt;
+            prevPiece = *it;
+            it++;
+            dirIt++;
         }
     }
 
-    void SnakeGame::moveWorm()
+    void SnakeGame::moveWorm(float drawStep)
     {
         HZ_PROFILE_FUNCTION();
-        auto drawStep = wormPieceSize / drawResolution;
         uint32_t dirItr = 0;
-        auto it = worm.begin();
-        auto dir = directions.begin();
-        while (it != worm.end())
-        {
-            moveWormPieceInDirection(*it, *dir, drawStep);
-            dir++;
-            it++;
-        }
+        auto it = worm.rbegin();
+        auto dir = directions.rbegin();
+        moveWormPieceInDirection(*it, *dir, drawStep);
     }
 
     std::shared_ptr<WormPiece> SnakeGame::createRandomFood()
@@ -441,10 +478,11 @@ namespace SnakeGame
     bool SnakeGame::isInCoordinateCenter()
     {
         bool ret = false;
+
         if (resolutionStep % drawResolution == 0)
         {
             ret = true;
-            resolutionStep = 0;
+            resolutionStep = 0.0f;
         }
 
         resolutionStep++;
@@ -505,7 +543,7 @@ namespace SnakeGame
         createTail();
 
          // render food
-        auto foodShared = std::make_shared<GL_ENGINE::Texture>(getAsset("apple"), food->x, food->y, wormPieceSize, wormPieceSize);
+        auto foodShared = std::make_shared<GL_ENGINE::Texture>(getAsset("apple"), food->x, food->y, 0.5f, wormPieceSize, wormPieceSize);
         GL_ENGINE::Renderer2D::getRenderer().addElement(wormLayoutKey, foodShared);
 
         GL_ENGINE::Renderer2D::getRenderer().drawScene();
@@ -525,6 +563,7 @@ namespace SnakeGame
         }
         else
         {
+            auto drawStep = wormPieceSize / drawResolution;
             if (isInCoordinateCenter())
             {
                 if (isTwoPiecesCollided(worm.back(), food))
@@ -533,10 +572,15 @@ namespace SnakeGame
                     food = createRandomFood();
                 }
 
+                if (currentMoveDirection != nextMoveDirection)
+                {
+                    drawStep = wormPieceSize;
+                    resolutionStep = 0.0f;
+                }
                 updateMoveDirection();
             }
 
-            moveWorm();
+            moveWorm(drawStep);
             render();
         }
     }

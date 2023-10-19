@@ -55,13 +55,14 @@ namespace
 
 namespace GL_ENGINE
 {
-	Texture::Texture(std::shared_ptr<TextureAsset> texAsset, float x, float y, float length, float width, float tiling) : m_x(x),
-																														  m_y(y),
-																														  m_length(length),
-																														  m_width(width),
-																														  m_tiling(tiling),
-																														  m_center(x+length/2.0f,y-width/2.0f,0.0f),
-																														  m_texAsset(texAsset)
+	Texture::Texture(std::shared_ptr<TextureAsset> texAsset, float x, float y, float z, float length, float width, float tiling) : m_x(x),
+																																   m_y(y),
+																																   m_z(z),
+																																   m_length(length),
+																																   m_width(width),
+																																   m_tiling(tiling),
+																																   m_center(x+length/2.0f,y-width/2.0f,0.0f),
+																																   m_texAsset(texAsset)
 	{
 		vertexElements.emplace_back(4, ElementDataType::FLOAT, true, 8 * sizeof(float));
 		vertexElements.emplace_back(2, ElementDataType::FLOAT, true, 8 * sizeof(float));
@@ -111,28 +112,28 @@ namespace GL_ENGINE
 
 		auto slot = m_texAsset->getActiveSlot();
         TextureVertex* vertex = reinterpret_cast<TextureVertex*>(v_ptr);
-        vertex->pos = *m_model * glm::vec4{m_x, m_y - m_width, 0.0f, 1.0f};
+        vertex->pos = *m_model * glm::vec4{m_x, m_y - m_width, m_z, 1.0f};
         vertex->texCoord = glm::vec2{0.0f, 0.0f};
 		vertex->slot = slot;
 		vertex->tiling = m_tiling;
         size += sizeof(TextureVertex);
         vertex++;
 
-        vertex->pos = *m_model * glm::vec4{m_x + m_length, m_y - m_width, 0.0f, 1.0f};
+        vertex->pos = *m_model * glm::vec4{m_x + m_length, m_y - m_width, m_z, 1.0f};
         vertex->texCoord = glm::vec2{1.0f, 0.0f};
 		vertex->slot = slot;
 		vertex->tiling = m_tiling;
         size += sizeof(TextureVertex);
         vertex++;
 
-		vertex->pos = *m_model * glm::vec4{m_x + m_length, m_y, 0.0f, 1.0f};
+		vertex->pos = *m_model * glm::vec4{m_x + m_length, m_y, m_z, 1.0f};
         vertex->texCoord = glm::vec2{1.0f, 1.0f};
 		vertex->slot = slot;
 		vertex->tiling = m_tiling;
         size += sizeof(TextureVertex);
         vertex++;
 
-		vertex->pos = *m_model * glm::vec4{m_x, m_y, 0.0f, 1.0f};
+		vertex->pos = *m_model * glm::vec4{m_x, m_y, m_z, 1.0f};
         vertex->texCoord = glm::vec2{0.0f, 1.0f};
 		vertex->slot = slot;
 		vertex->tiling = m_tiling;

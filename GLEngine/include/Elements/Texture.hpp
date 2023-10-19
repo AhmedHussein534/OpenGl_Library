@@ -13,7 +13,7 @@ namespace GL_ENGINE
     class Texture : public IElement
 	{
 	public:
-		Texture(std::shared_ptr<TextureAsset> texAsset, float x, float y, float length, float width, float tiling = 1.0f);
+		Texture(std::shared_ptr<TextureAsset> texAsset, float x, float y, float z, float length, float width, float tiling = 1.0f);
 
 		void setTexAsset(std::shared_ptr<TextureAsset> texAsset)
 		{
@@ -68,6 +68,7 @@ namespace GL_ENGINE
 	private:
 		float m_x;
 		float m_y;
+		float m_z;
 		float m_length;
 		float m_width;
 		float m_tiling;

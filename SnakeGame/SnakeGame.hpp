@@ -84,7 +84,7 @@ namespace SnakeGame
         void createTail();
         void createBody();
         std::shared_ptr<WormPiece> createRandomFood();
-        void moveWorm();
+        void moveWorm(float drawStep);
         bool isWormSelfCollided();
         void updateMoveDirection();
         bool isInCoordinateCenter();
